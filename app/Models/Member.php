@@ -13,6 +13,7 @@ class Member extends Model
     protected $fillable = [
     'full_name',
     'phone',
+    'barcode',
     'gender',
     'birth_date',
     'address',
@@ -30,6 +31,11 @@ public function subscriptions()
 {
     return $this->hasMany(Subscription::class);
 }
+// payments
+public function payments()
+{
+    return $this->hasMany(Payment::class);
+}
 
 public function attendances()
 {
@@ -43,12 +49,12 @@ protected function photoUrl(): Attribute
             : asset('assets/avatars/face-1.jpg'),
     );
 }
-// get age from birth date
+    // get age from birth date
 
-protected function age(): Attribute
-{
-    return Attribute::make(
-        get: fn () => $this->birth_date?->age,
-    );
-}
+    protected function age(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->birth_date?->age,
+        );
+    }
 }

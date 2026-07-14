@@ -4,62 +4,71 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Http\Requests\StorePaymentRequest;
+use App\Models\Payment;
+use App\Models\Subscription;
+use App\Services\PaymentService;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\View\View;
 
 class PaymentController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function __construct(protected PaymentService $paymentService)
     {
-        //
     }
-
+ 
     /**
-     * Show the form for creating a new resource.
+     * عرض قائمة كل المدفوعات.
      */
-    public function create()
+    public function index(): View
     {
-        //
+        $payments = $this->paymentService->list(
+            search: request('search'),
+            perPage: (int) request('per_page', 32),
+        );
+ 
+        return view('admin.payments.index', compact('payments'));
     }
-
+ 
     /**
-     * Store a newly created resource in storage.
+     * عرض فورم تسجيل دفعة جديدة.
+     * لو جاي من صفحة اشتراك معين، بيتحدد تلقائيًا في الفورم.
      */
-    public function store(Request $request)
+    public function create(): View
     {
-        //
+        $subscriptions = Subscription::with('member', 'plan')
+            ->whereIn('status', ['active', 'frozen'])
+            ->latest()
+            ->get();
+ 
+        $selectedSubscriptionId = request('subscription_id');
+ 
+        return view('admin.payments.create', compact('subscriptions', 'selectedSubscriptionId'));
     }
-
+ 
     /**
-     * Display the specified resource.
+     * حفظ دفعة جديدة.
      */
-    public function show(string $id)
+    public function store(StorePaymentRequest $request): RedirectResponse
     {
-        //
+        $subscription = Subscription::findOrFail($request->validated('subscription_id'));
+ 
+        $this->paymentService->create($subscription, $request->validated());
+ 
+        return redirect()
+            ->route('payments.index')
+            ->with('success', 'تم تسجيل الدفعة بنجاح.');
     }
-
+ 
     /**
-     * Show the form for editing the specified resource.
+     * حذف دفعة.
      */
-    public function edit(string $id)
+    public function destroy(Payment $payment): RedirectResponse
     {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        $this->paymentService->delete($payment);
+ 
+        return redirect()
+            ->route('payments.index')
+            ->with('success', 'تم حذف الدفعة بنجاح.');
     }
 }

@@ -26,25 +26,27 @@
                     'title' => 'الاشتراكات',
                     'icon'  => 'fe-credit-card',
                     'children' => [
-                        ['title' => 'جميع الاشتراكات', 'route' => 'dashboard'],
-                        ['title' => 'إضافة اشتراك',    'route' => 'dashboard'],
-                        ['title' => 'تجديد اشتراك',    'route' => 'dashboard'],
+                        ['title' => 'جميع الاشتراكات', 'route' => 'subscriptions.index'],
+                        ['title' => 'إضافة اشتراك',    'route' => 'subscriptions.create'],
+
+
+ 
                     ],
                 ],
                 [
                     'title' => 'الباقات',
                     'icon'  => 'fe-box',
                     'children' => [
-                        ['title' => 'جميع الباقات', 'route' => 'dashboard'],
-                        ['title' => 'إضافة باقة',   'route' => 'dashboard'],
+                        ['title' => 'جميع الباقات', 'route' => 'plans.index'],
+                        ['title' => 'إضافة باقة',   'route' => 'plans.create'],
                     ],
                 ],
                 [
                     'title' => 'العروض',
                     'icon'  => 'fe-gift',
                     'children' => [
-                        ['title' => 'جميع العروض', 'route' => 'dashboard'],
-                        ['title' => 'إضافة عرض',   'route' => 'dashboard'],
+                        ['title' => 'جميع العروض', 'route' => 'offers.index'],
+                        ['title' => 'إضافة عرض',   'route' => 'offers.create'],
                     ],
                 ],
             ],
@@ -57,16 +59,16 @@
                     'title' => 'الحضور والانصراف',
                     'icon'  => 'fe-calendar',
                     'children' => [
-                        ['title' => 'تسجيل حضور', 'route' => 'dashboard'],
-                        ['title' => 'سجل الحضور', 'route' => 'dashboard'],
+                        ['title' => 'تسجيل حضور', 'route' => 'attendances.scan'],
+                        ['title' => 'سجل الحضور', 'route' => 'attendances.index'],
                     ],
                 ],
                 [
                     'title' => 'المدفوعات',
                     'icon'  => 'fe-dollar-sign',
                     'children' => [
-                        ['title' => 'جميع المدفوعات', 'route' => 'dashboard'],
-                        ['title' => 'إضافة دفعة',     'route' => 'dashboard'],
+                        ['title' => 'جميع المدفوعات', 'route' => 'payments.index'],
+                        ['title' => 'إضافة دفعة',     'route' => 'payments.create'],
                     ],
                 ],
                 [
@@ -87,10 +89,7 @@
                     'title' => 'التقارير',
                     'icon'  => 'fe-bar-chart-2',
                     'children' => [
-                        ['title' => 'الإيرادات',  'route' => 'dashboard'],
-                        ['title' => 'الأعضاء',    'route' => 'dashboard'],
-                        ['title' => 'الاشتراكات', 'route' => 'dashboard'],
-                        ['title' => 'الحضور',     'route' => 'dashboard'],
+                        ['title' => 'جميع التقارير',  'route' => 'reports.index'],
                     ],
                 ],
                 [

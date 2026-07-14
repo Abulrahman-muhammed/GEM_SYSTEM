@@ -111,11 +111,17 @@
                           @endif
                         </td>
                         <td>
+
                           <div class="btn-group justify-content-center d-flex">
                             <a href="{{ route('members.edit', $member) }}"
                                class="btn btn-sm btn-icon btn-outline-primary" title="تعديل" data-toggle="tooltip">
                               <i class="fe fe-edit"></i>
                             </a>
+                            <a href="{{ route('members.show', $member) }}"
+                               class="btn btn-sm btn-icon btn-outline-primary" title="عرض" data-toggle="tooltip">
+                              <i class="fe fe-eye"></i>
+                            </a>
+
                             <form action="{{ route('members.destroy', $member) }}" method="POST"
                                   class="d-inline delete-member-form">
                               @csrf

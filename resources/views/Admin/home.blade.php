@@ -1,484 +1,326 @@
-@extends('Admin.layouts.master')
+@extends('admin.layouts.master')
 @section('title')
-    Dashboard
+    لوحة التحكم
 @endsection
 @section('content')
 <div class="container-fluid">
-    <div class="row justify-content-center">
+  <div class="row justify-content-center">
     <div class="col-12">
-        <div class="row align-items-center mb-2">
-        <div class="col">
-            <h2 class="h5 page-title">مرحبا بك يا {{ auth()->user()->name }}!</h2>
+
+      {{-- ══════════════════════════ الترحيب + الساعة الحية ══════════════════════════ --}}
+      <div class="hero-banner mb-4">
+        <div>
+          <div class="hero-greeting" id="greetingText"></div>
+          <h3 class="mb-1">{{ auth()->user()->name }} 👋</h3>
+          <div class="text-muted">{{ now()->translatedFormat('l، d F Y') }}</div>
         </div>
-        <div class="col-auto">
-            <form class="form-inline">
-            <div class="form-group d-none d-lg-inline">
-                <label for="reportrange" class="sr-only">Date Ranges</label>
-                <div id="reportrange" class="px-2 py-2 text-muted">
-                <span class="small"></span>
-                </div>
+        <div class="hero-clock" id="liveClock">--:--:-- --</div>
+      </div>
+
+      {{-- ══════════════════════════ التنبيهات ══════════════════════════ --}}
+      @if (count($alerts))
+        <div class="mb-4">
+          @foreach ($alerts as $alert)
+            <div class="alert-widget alert-widget-{{ $alert['type'] }}">
+              <i class="fe {{ $alert['icon'] }}"></i>
+              <span>{{ $alert['message'] }}</span>
             </div>
-            <div class="form-group">
-                <button type="button" class="btn btn-sm"><span class="fe fe-refresh-ccw fe-16 text-muted"></span></button>
-                <button type="button" class="btn btn-sm mr-2"><span class="fe fe-filter fe-16 text-muted"></span></button>
+          @endforeach
+        </div>
+      @endif
+
+      {{-- ══════════════════════════ الصف الأول: KPIs ══════════════════════════ --}}
+      <div class="row mb-4">
+        <div class="col-6 col-lg-3 mb-3 mb-lg-0">
+          <div class="kpi-card kpi-blue">
+            <div class="kpi-icon"><i class="fe fe-users"></i></div>
+            <div class="kpi-value">{{ number_format($kpis['total_members']) }}</div>
+            <div class="kpi-label">إجمالي الأعضاء</div>
+          </div>
+        </div>
+        <div class="col-6 col-lg-3 mb-3 mb-lg-0">
+          <div class="kpi-card kpi-green">
+            <div class="kpi-icon"><i class="fe fe-check-circle"></i></div>
+            <div class="kpi-value">{{ number_format($kpis['today_attendance']) }}</div>
+            <div class="kpi-label">الحضور اليوم</div>
+          </div>
+        </div>
+        <div class="col-6 col-lg-3">
+          <div class="kpi-card kpi-green">
+            <div class="kpi-icon"><i class="fe fe-dollar-sign"></i></div>
+            <div class="kpi-value">{{ number_format($kpis['today_revenue'], 0) }} <small>جنيه</small></div>
+            <div class="kpi-label">الإيراد اليوم</div>
+          </div>
+        </div>
+        <div class="col-6 col-lg-3">
+          <div class="kpi-card kpi-orange">
+            <div class="kpi-icon"><i class="fe fe-clock"></i></div>
+            <div class="kpi-value">{{ number_format($kpis['expiring_subscriptions']) }}</div>
+            <div class="kpi-label">اشتراكات هتنتهي قريب</div>
+          </div>
+        </div>
+      </div>
+
+      {{-- ══════════════════════════ الصف الثاني: الشارتس ══════════════════════════ --}}
+      <div class="row mb-4">
+        <div class="col-lg-8 mb-3 mb-lg-0">
+          <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-white">
+              <strong>الحضور — آخر 7 أيام</strong>
             </div>
-            </form>
-        </div>
-        </div>
-        <div class="mb-2 align-items-center">
-        <div class="card shadow mb-4">
             <div class="card-body">
-            <div class="row mt-1 align-items-center">
-                <div class="col-12 col-lg-4 text-left pl-4">
-                <p class="mb-1 small text-muted">Balance</p>
-                <span class="h3">$12,600</span>
-                <span class="small text-muted">+20%</span>
-                <span class="fe fe-arrow-up text-success fe-12"></span>
-                <p class="text-muted mt-2"> Etiam ultricies nisi vel augue. Curabitur ullamcorper ultricies nisi. Nam eget dui </p>
-                </div>
-                <div class="col-6 col-lg-2 text-center py-4">
-                <p class="mb-1 small text-muted">Today</p>
-                <span class="h3">$2600</span><br />
-                <span class="small text-muted">+20%</span>
-                <span class="fe fe-arrow-up text-success fe-12"></span>
-                </div>
-                <div class="col-6 col-lg-2 text-center py-4 mb-2">
-                <p class="mb-1 small text-muted">Goal Value</p>
-                <span class="h3">$260</span><br />
-                <span class="small text-muted">+6%</span>
-                <span class="fe fe-arrow-up text-success fe-12"></span>
-                </div>
-                <div class="col-6 col-lg-2 text-center py-4">
-                <p class="mb-1 small text-muted">Completions</p>
-                <span class="h3">26</span><br />
-                <span class="small text-muted">+20%</span>
-                <span class="fe fe-arrow-up text-success fe-12"></span>
-                </div>
-                <div class="col-6 col-lg-2 text-center py-4">
-                <p class="mb-1 small text-muted">Conversion</p>
-                <span class="h3">6%</span><br />
-                <span class="small text-muted">-2%</span>
-                <span class="fe fe-arrow-down text-danger fe-12"></span>
-                </div>
+              <div id="attendanceChart"></div>
             </div>
-            <div class="chartbox mr-4">
-                <div id="areaChart"></div>
-            </div>
-            </div> <!-- .card-body -->
-        </div> <!-- .card -->
+          </div>
         </div>
-        <div class="row items-align-baseline">
-        <div class="col-md-12 col-lg-4">
-            <div class="card shadow eq-card mb-4">
-            <div class="card-body mb-n3">
-                <div class="row items-align-baseline h-100">
-                <div class="col-md-6 my-3">
-                    <p class="mb-0"><strong class="mb-0 text-uppercase text-muted">Earning</strong></p>
-                    <h3>$2,562</h3>
-                    <p class="text-muted">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-                </div>
-                <div class="col-md-6 my-4 text-center">
-                    <div lass="chart-box mx-4">
-                    <div id="radialbarWidget"></div>
-                    </div>
-                </div>
-                <div class="col-md-6 border-top py-3">
-                    <p class="mb-1"><strong class="text-muted">Cost</strong></p>
-                    <h4 class="mb-0">108</h4>
-                    <p class="small text-muted mb-0"><span>37.7% Last week</span></p>
-                </div> <!-- .col -->
-                <div class="col-md-6 border-top py-3">
-                    <p class="mb-1"><strong class="text-muted">Revenue</strong></p>
-                    <h4 class="mb-0">1168</h4>
-                    <p class="small text-muted mb-0"><span>-18.9% Last week</span></p>
-                </div> <!-- .col -->
-                </div>
-            </div> <!-- .card-body -->
-            </div> <!-- .card -->
-        </div> <!-- .col -->
-        <div class="col-md-12 col-lg-4">
-            <div class="card shadow eq-card mb-4">
+        <div class="col-lg-4">
+          <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-white">
+              <strong>توزيع الاشتراكات</strong>
+            </div>
             <div class="card-body">
-                <div class="chart-widget mb-2">
-                <div id="radialbar"></div>
+              <div id="subscriptionsChart"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {{-- ══════════════════════════ الصف الثالث: أحدث حضور + اشتراكات هتنتهي ══════════════════════════ --}}
+      <div class="row mb-4">
+        <div class="col-lg-6 mb-3 mb-lg-0">
+          <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+              <strong>أحدث حضور</strong>
+              <a href="{{ route('attendances.index') }}" class="small text-muted">عرض الكل</a>
+            </div>
+            <div class="card-body p-0">
+              @forelse ($recentAttendance as $attendance)
+                <div class="list-row d-flex justify-content-between align-items-center">
+                  <div class="d-flex align-items-center">
+                    <img src="{{ $attendance->member->photo_url }}" class="list-avatar rounded-circle me-2" alt="">
+                    <span class="font-weight-bold">{{ $attendance->member->full_name }}</span>
+                  </div>
+                  <span class="text-muted small">{{ $attendance->check_in->format('h:i A') }}</span>
                 </div>
-                <div class="row items-align-center">
-                <div class="col-4 text-center">
-                    <p class="text-muted mb-1">Cost</p>
-                    <h6 class="mb-1">$1,823</h6>
-                    <p class="text-muted mb-0">+12%</p>
+              @empty
+                <div class="text-center text-muted py-4">لا يوجد حضور مسجل النهاردة</div>
+              @endforelse
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-6">
+          <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+              <strong>اشتراكات هتنتهي قريب</strong>
+              <a href="{{ route('subscriptions.index') }}" class="small text-muted">عرض الكل</a>
+            </div>
+            <div class="card-body p-0">
+              @forelse ($expiringSoon as $subscription)
+                @php $daysLeft = today()->diffInDays($subscription->end_date, false); @endphp
+                <div class="list-row d-flex justify-content-between align-items-center">
+                  <span class="font-weight-bold">{{ $subscription->member->full_name }}</span>
+                  <span class="badge badge-pill {{ $daysLeft <= 1 ? 'badge-status-danger' : 'badge-status-warning' }}">
+                    باقي {{ $daysLeft }} {{ $daysLeft == 1 ? 'يوم' : 'أيام' }}
+                  </span>
                 </div>
-                <div class="col-4 text-center">
-                    <p class="text-muted mb-1">Revenue</p>
-                    <h6 class="mb-1">$6,830</h6>
-                    <p class="text-muted mb-0">+8%</p>
-                </div>
-                <div class="col-4 text-center">
-                    <p class="text-muted mb-1">Earning</p>
-                    <h6 class="mb-1">$4,830</h6>
-                    <p class="text-muted mb-0">+8%</p>
-                </div>
-                </div>
-            </div> <!-- .card-body -->
-            </div> <!-- .card -->
-        </div> <!-- .col -->
-        <div class="col-md-12 col-lg-4">
-            <div class="card shadow eq-card mb-4">
+              @empty
+                <div class="text-center text-muted py-4">مفيش اشتراكات هتنتهي قريب</div>
+              @endforelse
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {{-- ══════════════════════════ الصف الرابع: الإيرادات ══════════════════════════ --}}
+      <div class="row mb-4">
+        <div class="col-12">
+          <div class="card shadow-sm border-0">
+            <div class="card-header bg-white">
+              <strong>الإيرادات</strong>
+            </div>
             <div class="card-body">
-                <div class="d-flex mt-3 mb-4">
-                <div class="flex-fill pt-2">
-                    <p class="mb-0 text-muted">Total</p>
-                    <h4 class="mb-0">108</h4>
-                    <span class="small text-muted">+37.7%</span>
+              <div class="row text-center">
+                <div class="col-4">
+                  <div class="revenue-value">{{ number_format($revenueStats['today'], 0) }}</div>
+                  <div class="revenue-label">اليوم</div>
                 </div>
-                <div class="flex-fill chart-box mt-n2">
-                    <div id="barChartWidget"></div>
+                <div class="col-4">
+                  <div class="revenue-value">{{ number_format($revenueStats['week'], 0) }}</div>
+                  <div class="revenue-label">الأسبوع</div>
                 </div>
-                </div> <!-- .d-flex -->
-                <div class="row border-top">
-                <div class="col-md-6 pt-4">
-                    <h6 class="mb-0">108 <span class="small text-muted">+37.7%</span></h6>
-                    <p class="mb-0 text-muted">Cost</p>
+                <div class="col-4">
+                  <div class="revenue-value">{{ number_format($revenueStats['month'], 0) }}</div>
+                  <div class="revenue-label">الشهر</div>
                 </div>
-                <div class="col-md-6 pt-4">
-                    <h6 class="mb-0">1168 <span class="small text-muted">-18.9%</span></h6>
-                    <p class="mb-0 text-muted">Revenue</p>
-                </div>
-                </div> <!-- .row -->
-            </div> <!-- .card-body -->
-            </div> <!-- .card -->
-        </div> <!-- .col-md -->
-        </div> <!-- .row -->
-        <div class="row">
-        <!-- Recent Activity -->
-        <div class="col-md-12 col-lg-4 mb-4">
-            <div class="card timeline shadow">
-            <div class="card-header">
-                <strong class="card-title">Recent Activity</strong>
-                <a class="float-right small text-muted" href="#!">View all</a>
+              </div>
             </div>
-            <div class="card-body" data-simplebar style="height:355px; overflow-y: auto; overflow-x: hidden;">
-                <h6 class="text-uppercase text-muted mb-4">Today</h6>
-                <div class="pb-3 timeline-item item-primary">
-                <div class="pl-5">
-                    <div class="mb-1"><strong>@Brown Asher</strong><span class="text-muted small mx-2">Just create new layout Index, form, table</span><strong>Tiny Admin</strong></div>
-                    <p class="small text-muted">Creative Design <span class="badge badge-light">1h ago</span>
-                    </p>
-                </div>
-                </div>
-                <div class="pb-3 timeline-item item-warning">
-                <div class="pl-5">
-                    <div class="mb-3"><strong>@Hester Nissim</strong><span class="text-muted small mx-2">has upload new files to</span><strong>Tiny Admin</strong></div>
-                    <div class="row mb-3">
-                    <div class="col"><img src="{{asset('assets/products/p1.jpg')}}" alt="..." class="img-fluid rounded"></div>
-                    <div class="col"><img src="{{asset('assets/products/p2.jpg')}}" alt="..." class="img-fluid rounded"></div>
-                    <div class="col"><img src="{{asset('assets/products/p3.jpg')}}" alt="..." class="img-fluid rounded"></div>
-                    <div class="col"><img src="{{asset('assets/products/p4.jpg')}}" alt="..." class="img-fluid rounded"></div>
-                    </div>
-                    <p class="small text-muted">Front-End Development <span class="badge badge-light">1h ago</span>
-                    </p>
-                </div>
-                </div>
-                <div class="pb-3 timeline-item item-success">
-                <div class="pl-5">
-                    <div class="mb-3"><strong>@Kelley Sonya</strong><span class="text-muted small mx-2">has commented on</span><strong>Advanced table</strong></div>
-                    <div class="card d-inline-flex mb-2">
-                    <div class="card-body bg-light py-2 px-3 small rounded"> Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer dignissim nulla eu quam cursus placerat. Vivamus non odio ullamcorper, lacinia ante nec, blandit leo. </div>
-                    </div>
-                    <p class="small text-muted">Back-End Development <span class="badge badge-light">1h ago</span>
-                    </p>
-                </div>
-                </div>
-                <h6 class="text-uppercase text-muted mb-4">Yesterday</h6>
-                <div class="pb-3 timeline-item item-warning">
-                <div class="pl-5">
-                    <div class="mb-3"><strong>@Fletcher Everett</strong><span class="text-muted small mx-2">created new group for</span><strong>Tiny Admin</strong></div>
-                    <ul class="avatars-list mb-3">
-                    <li>
-                        <a href="#!" class="avatar avatar-sm">
-                        <img alt="..." class="avatar-img rounded-circle" src="{{asset('assets/avatars/face-1.jpg')}}">
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#!" class="avatar avatar-sm">
-                        <img alt="..." class="avatar-img rounded-circle" src="{{asset('assets/avatars/face-4.jpg')}}">
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#!" class="avatar avatar-sm">
-                        <img alt="..." class="avatar-img rounded-circle" src="{{asset('assets/avatars/face-3.jpg')}}">
-                        </a>
-                    </li>
-                    </ul>
-                    <p class="small text-muted">Front-End Development <span class="badge badge-light">1h ago</span>
-                    </p>
-                </div>
-                </div>
-                <div class="pb-3 timeline-item item-success">
-                <div class="pl-5">
-                    <div class="mb-3"><strong>@Bertha Ball</strong><span class="text-muted small mx-2">has commented on</span><strong>Advanced table</strong></div>
-                    <div class="card d-inline-flex mb-2">
-                    <div class="card-body bg-light py-2 px-3"> Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer dignissim nulla eu quam cursus placerat. Vivamus non odio ullamcorper, lacinia ante nec, blandit leo. </div>
-                    </div>
-                    <p class="small text-muted">Back-End Development <span class="badge badge-light">1h ago</span>
-                    </p>
-                </div>
-                </div>
-                <div class="pb-3 timeline-item item-danger">
-                <div class="pl-5">
-                    <div class="mb-3"><strong>@Lillith Joseph</strong><span class="text-muted small mx-2">has upload new files to</span><strong>Tiny Admin</strong></div>
-                    <div class="row mb-3">
-                    <div class="col"><img src="{{asset('assets/products/p4.jpg')}}" alt="..." class="img-fluid rounded"></div>
-                    <div class="col"><img src="{{asset('assets/products/p1.jpg')}}" alt="..." class="img-fluid rounded"></div>
-                    <div class="col"><img src="{{asset('assets/products/p2.jpg')}}" alt="..." class="img-fluid rounded"></div>
-                    </div>
-                    <p class="small text-muted">Front-End Development <span class="badge badge-light">1h ago</span>
-                    </p>
-                </div>
-                </div>
-            </div> <!-- / .card-body -->
-            </div> <!-- / .card -->
-        </div> <!-- / .col-md-6 -->
-        <!-- Striped rows -->
-        <div class="col-md-12 col-lg-8">
-            <div class="card shadow">
-            <div class="card-header">
-                <strong class="card-title">Recent Data</strong>
-                <a class="float-right small text-muted" href="#!">View all</a>
-            </div>
-            <div class="card-body my-n2">
-                <table class="table table-striped table-hover table-borderless">
-                <thead>
-                    <tr>
-                    <th>ID</th>
-                    <th>Name</th>
-                    <th>Address</th>
-                    <th>Date</th>
-                    <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                    <td>2474</td>
-                    <th scope="col">Brown, Asher D.</th>
-                    <td>Ap #331-7123 Lobortis Avenue</td>
-                    <td>13/09/2020</td>
-                    <td>
-                        <div class="dropdown">
-                        <button class="btn btn-sm dropdown-toggle more-vertical" type="button" id="dr1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <span class="text-muted sr-only">Action</span>
-                        </button>
-                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dr1">
-                            <a class="dropdown-item" href="#">Edit</a>
-                            <a class="dropdown-item" href="#">Remove</a>
-                            <a class="dropdown-item" href="#">Assign</a>
-                        </div>
-                        </div>
-                    </td>
-                    </tr>
-                    <tr>
-                    <td>2786</td>
-                    <th scope="col">Leblanc, Yoshio V.</th>
-                    <td>287-8300 Nisl. St.</td>
-                    <td>04/05/2019</td>
-                    <td>
-                        <div class="dropdown">
-                        <button class="btn btn-sm dropdown-toggle more-vertical" type="button" id="dr2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <span class="text-muted sr-only">Action</span>
-                        </button>
-                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dr2">
-                            <a class="dropdown-item" href="#">Edit</a>
-                            <a class="dropdown-item" href="#">Remove</a>
-                            <a class="dropdown-item" href="#">Assign</a>
-                        </div>
-                        </div>
-                    </td>
-                    </tr>
-                    <tr>
-                    <td>2747</td>
-                    <th scope="col">Hester, Nissim L.</th>
-                    <td>4577 Cras St.</td>
-                    <td>04/06/2019</td>
-                    <td>
-                        <div class="dropdown">
-                        <button class="btn btn-sm dropdown-toggle more-vertical" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <span class="text-muted sr-only">Action</span>
-                        </button>
-                        <div class="dropdown-menu dropdown-menu-right">
-                            <a class="dropdown-item" href="#">Edit</a>
-                            <a class="dropdown-item" href="#">Remove</a>
-                            <a class="dropdown-item" href="#">Assign</a>
-                        </div>
-                        </div>
-                    </td>
-                    </tr>
-                    <tr>
-                    <td>2639</td>
-                    <th scope="col">Gardner, Leigh S.</th>
-                    <td>P.O. Box 228, 7512 Lectus Ave</td>
-                    <td>04/08/2019</td>
-                    <td>
-                        <div class="dropdown">
-                        <button class="btn btn-sm dropdown-toggle more-vertical" type="button" id="dr4" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <span class="text-muted sr-only">Action</span>
-                        </button>
-                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dr4">
-                            <a class="dropdown-item" href="#">Edit</a>
-                            <a class="dropdown-item" href="#">Remove</a>
-                            <a class="dropdown-item" href="#">Assign</a>
-                        </div>
-                        </div>
-                    </td>
-                    </tr>
-                    <tr>
-                    <td>2238</td>
-                    <th scope="col">Higgins, Uriah L.</th>
-                    <td>Ap #377-5357 Sed Road</td>
-                    <td>04/01/2019</td>
-                    <td>
-                        <div class="dropdown">
-                        <button class="btn btn-sm dropdown-toggle more-vertical" type="button" id="dr5" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <span class="text-muted sr-only">Action</span>
-                        </button>
-                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dr5">
-                            <a class="dropdown-item" href="#">Edit</a>
-                            <a class="dropdown-item" href="#">Remove</a>
-                            <a class="dropdown-item" href="#">Assign</a>
-                        </div>
-                        </div>
-                    </td>
-                    </tr>
-                </tbody>
-                </table>
-            </div>
-            </div>
-        </div> <!-- Striped rows -->
-        </div> <!-- .row-->
-    </div> <!-- .col-12 -->
-    </div> <!-- .row -->
-</div> <!-- .container-fluid -->
-<div class="modal fade modal-notif modal-slide" tabindex="-1" role="dialog" aria-labelledby="defaultModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-sm" role="document">
-    <div class="modal-content">
-        <div class="modal-header">
-        <h5 class="modal-title" id="defaultModalLabel">Notifications</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-        </button>
+          </div>
         </div>
-        <div class="modal-body">
-        <div class="list-group list-group-flush my-n3">
-            <div class="list-group-item bg-transparent">
-            <div class="row align-items-center">
-                <div class="col-auto">
-                <span class="fe fe-box fe-24"></span>
-                </div>
-                <div class="col">
-                <small><strong>Package has uploaded successfull</strong></small>
-                <div class="my-0 text-muted small">Package is zipped and uploaded</div>
-                <small class="badge badge-pill badge-light text-muted">1m ago</small>
-                </div>
+      </div>
+
+      {{-- ══════════════════════════ الصف الخامس: آخر المدفوعات ══════════════════════════ --}}
+      <div class="row mb-4">
+        <div class="col-12">
+          <div class="card shadow-sm border-0">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+              <strong>آخر المدفوعات</strong>
+              <a href="{{ route('payments.index') }}" class="small text-muted">عرض الكل</a>
             </div>
+            <div class="card-body p-0">
+              @forelse ($recentPayments as $payment)
+                <div class="list-row d-flex justify-content-between align-items-center">
+                  <span class="font-weight-bold">{{ $payment->subscription->member->full_name }}</span>
+                  <span class="text-success font-weight-bold">{{ number_format($payment->amount, 2) }} جنيه</span>
+                </div>
+              @empty
+                <div class="text-center text-muted py-4">لا توجد مدفوعات مسجلة</div>
+              @endforelse
             </div>
-            <div class="list-group-item bg-transparent">
-            <div class="row align-items-center">
-                <div class="col-auto">
-                <span class="fe fe-download fe-24"></span>
-                </div>
-                <div class="col">
-                <small><strong>Widgets are updated successfull</strong></small>
-                <div class="my-0 text-muted small">Just create new layout Index, form, table</div>
-                <small class="badge badge-pill badge-light text-muted">2m ago</small>
-                </div>
-            </div>
-            </div>
-            <div class="list-group-item bg-transparent">
-            <div class="row align-items-center">
-                <div class="col-auto">
-                <span class="fe fe-inbox fe-24"></span>
-                </div>
-                <div class="col">
-                <small><strong>Notifications have been sent</strong></small>
-                <div class="my-0 text-muted small">Fusce dapibus, tellus ac cursus commodo</div>
-                <small class="badge badge-pill badge-light text-muted">30m ago</small>
-                </div>
-            </div> <!-- / .row -->
-            </div>
-            <div class="list-group-item bg-transparent">
-            <div class="row align-items-center">
-                <div class="col-auto">
-                <span class="fe fe-link fe-24"></span>
-                </div>
-                <div class="col">
-                <small><strong>Link was attached to menu</strong></small>
-                <div class="my-0 text-muted small">New layout has been attached to the menu</div>
-                <small class="badge badge-pill badge-light text-muted">1h ago</small>
-                </div>
-            </div>
-            </div> <!-- / .row -->
-        </div> <!-- / .list-group -->
+          </div>
         </div>
-        <div class="modal-footer">
-        <button type="button" class="btn btn-secondary btn-block" data-dismiss="modal">Clear All</button>
-        </div>
+      </div>
+
     </div>
-    </div>
-</div>
-<div class="modal fade modal-shortcut modal-slide" tabindex="-1" role="dialog" aria-labelledby="defaultModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-    <div class="modal-content">
-        <div class="modal-header">
-        <h5 class="modal-title" id="defaultModalLabel">Shortcuts</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-        </button>
-        </div>
-        <div class="modal-body px-5">
-        <div class="row align-items-center">
-            <div class="col-6 text-center">
-            <div class="squircle bg-success justify-content-center">
-                <i class="fe fe-cpu fe-32 align-self-center text-white"></i>
-            </div>
-            <p>Control area</p>
-            </div>
-            <div class="col-6 text-center">
-            <div class="squircle bg-primary justify-content-center">
-                <i class="fe fe-activity fe-32 align-self-center text-white"></i>
-            </div>
-            <p>Activity</p>
-            </div>
-        </div>
-        <div class="row align-items-center">
-            <div class="col-6 text-center">
-            <div class="squircle bg-primary justify-content-center">
-                <i class="fe fe-droplet fe-32 align-self-center text-white"></i>
-            </div>
-            <p>Droplet</p>
-            </div>
-            <div class="col-6 text-center">
-            <div class="squircle bg-primary justify-content-center">
-                <i class="fe fe-upload-cloud fe-32 align-self-center text-white"></i>
-            </div>
-            <p>Upload</p>
-            </div>
-        </div>
-        <div class="row align-items-center">
-            <div class="col-6 text-center">
-            <div class="squircle bg-primary justify-content-center">
-                <i class="fe fe-users fe-32 align-self-center text-white"></i>
-            </div>
-            <p>Users</p>
-            </div>
-            <div class="col-6 text-center">
-            <div class="squircle bg-primary justify-content-center">
-                <i class="fe fe-settings fe-32 align-self-center text-white"></i>
-            </div>
-            <p>Settings</p>
-            </div>
-        </div>
-        </div>
-    </div>
-    </div>
+  </div>
 </div>
 @endsection
-    
+
+@push('styles')
+<style>
+  .hero-banner {
+    background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%);
+    color: #fff;
+    border-radius: 1rem;
+    padding: 1.75rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .hero-greeting { font-size: .95rem; opacity: .85; margin-bottom: 4px; }
+  .hero-banner h3 { color: #fff; }
+  .hero-banner .text-muted { color: rgba(255,255,255,.75) !important; }
+
+  .hero-clock {
+    font-size: 2rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    direction: ltr;
+  }
+
+  .alert-widget {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: .8rem 1.1rem;
+    border-radius: .6rem;
+    margin-bottom: .5rem;
+    font-weight: 500;
+  }
+
+  .alert-widget-warning { background: rgba(255, 152, 0, .1); color: #b25e00; }
+  .alert-widget-info    { background: rgba(13, 110, 253, .08); color: #0d6efd; }
+  .alert-widget-danger  { background: rgba(220, 53, 69, .1); color: #dc3545; }
+
+  .kpi-card {
+    background: #fff;
+    border-radius: .9rem;
+    padding: 1.25rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,.06);
+    height: 100%;
+  }
+
+  .kpi-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    margin-bottom: .75rem;
+  }
+
+  .kpi-blue .kpi-icon   { background: rgba(13, 110, 253, .1);  color: #0d6efd; }
+  .kpi-green .kpi-icon  { background: rgba(25, 135, 84, .12);  color: #198754; }
+  .kpi-orange .kpi-icon { background: rgba(255, 152, 0, .12);  color: #e08600; }
+  .kpi-red .kpi-icon    { background: rgba(220, 53, 69, .12);  color: #dc3545; }
+
+  .kpi-value { font-size: 1.6rem; font-weight: 700; }
+  .kpi-value small { font-size: .9rem; font-weight: 500; color: #6b7280; }
+  .kpi-label { color: #6b7280; font-size: .82rem; }
+
+  .card { border-radius: .9rem; overflow: hidden; }
+
+  .list-row {
+    padding: .8rem 1.25rem;
+    border-bottom: 1px solid #f1f3f8;
+  }
+  .list-row:last-child { border-bottom: none; }
+
+  .list-avatar { width: 32px; height: 32px; object-fit: cover; }
+
+  .badge-status-warning { background: rgba(255, 152, 0, .12); color: #b25e00; padding: .35rem .7rem; }
+  .badge-status-danger  { background: rgba(220, 53, 69, .12); color: #dc3545; padding: .35rem .7rem; }
+
+  .revenue-value { font-size: 1.5rem; font-weight: 700; color: #198754; }
+  .revenue-label { color: #6b7280; font-size: .82rem; }
+</style>
+@endpush
+
+@push('scripts')
+<script>
+  /* ══════════════ الساعة الحية + التحية ══════════════ */
+  function updateClockAndGreeting() {
+    const now = new Date();
+
+    let h = now.getHours();
+    const m = String(now.getMinutes()).padStart(2, '0');
+    const s = String(now.getSeconds()).padStart(2, '0');
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    h = h % 12 || 12;
+
+    document.getElementById('liveClock').textContent =
+      String(h).padStart(2, '0') + ':' + m + ':' + s + ' ' + ampm;
+
+    const hour = now.getHours();
+    let greeting = 'مساء الخير';
+    if (hour < 12) greeting = 'صباح الخير';
+    else if (hour < 17) greeting = 'مساء الخير';
+
+    document.getElementById('greetingText').textContent = greeting;
+  }
+
+  updateClockAndGreeting();
+  setInterval(updateClockAndGreeting, 1000);
+
+  /* ══════════════ شارت الحضور آخر 7 أيام ══════════════ */
+  if (window.ApexCharts) {
+    new ApexCharts(document.querySelector('#attendanceChart'), {
+      chart: { type: 'bar', height: 260, toolbar: { show: false } },
+      series: [{ name: 'الحضور', data: @json($attendanceLast7Days['data']) }],
+      xaxis: { categories: @json($attendanceLast7Days['labels']) },
+      colors: ['#0d6efd'],
+      plotOptions: { bar: { borderRadius: 6, columnWidth: '45%' } },
+      dataLabels: { enabled: false },
+    }).render();
+
+    /* ══════════════ شارت توزيع الاشتراكات ══════════════ */
+    new ApexCharts(document.querySelector('#subscriptionsChart'), {
+      chart: { type: 'donut', height: 260 },
+      series: [
+        {{ $subscriptionsBreakdown['counts']['active'] }},
+        {{ $subscriptionsBreakdown['counts']['expired'] }},
+        {{ $subscriptionsBreakdown['counts']['frozen'] }},
+        {{ $subscriptionsBreakdown['counts']['cancelled'] }}
+      ],
+      labels: ['نشط', 'منتهي', 'مجمد', 'ملغي'],
+      colors: ['#198754', '#dc3545', '#e08600', '#6c757d'],
+      legend: { position: 'bottom' },
+    }).render();
+  }
+</script>
+@endpush

@@ -9,6 +9,8 @@ class Plan extends Model
 {
     /** @use HasFactory<\Database\Factories\PlanFactory> */
     use HasFactory;
+  
+
     protected $fillable = [
     'name',
     'price',
@@ -25,4 +27,13 @@ public function subscriptions()
 {
     return $this->hasMany(Subscription::class);
 }
+
+/**
+ * Scope active plans.
+ */
+public function scopeActive($query)
+{
+    return $query->where('status', true);
+}
+
 }

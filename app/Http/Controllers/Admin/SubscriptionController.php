@@ -3,63 +3,137 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Http\Requests\StoreSubscriptionRequest;
+use App\Models\Member;
+use App\Models\Offer;
+use App\Models\Plan;
+use App\Models\Subscription;
+use App\Services\SubscriptionService;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\View\View;
 
 class SubscriptionController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function __construct(protected SubscriptionService $subscriptionService)
     {
-        //
     }
 
     /**
-     * Show the form for creating a new resource.
+     * عرض قائمة الاشتراكات.
      */
-    public function create()
+    public function index(): View
     {
-        //
+        $subscriptions = $this->subscriptionService->list(
+            search: request('search'),
+            perPage: (int) request('per_page', 32),
+        );
+
+        return view('admin.subscriptions.index', compact('subscriptions'));
     }
 
     /**
-     * Store a newly created resource in storage.
+     * عرض فورم إضافة اشتراك جديد.
      */
-    public function store(Request $request)
+    public function create(): View
     {
-        //
+        $members = Member::orderBy('full_name')->get(['id', 'full_name', 'phone']);
+        $plans   = Plan::active()->orderBy('name')->get(['id', 'name', 'price', 'duration_days']);
+        $offers  = Offer::active()->orderBy('name')->get(['id', 'name', 'discount_type', 'discount_value']);
+
+        return view('admin.subscriptions.create', compact('members', 'plans', 'offers'));
     }
 
     /**
-     * Display the specified resource.
+     * حفظ اشتراك جديد.
      */
-    public function show(string $id)
+    public function store(StoreSubscriptionRequest $request): RedirectResponse
     {
-        //
+        $this->subscriptionService->createSubscription($request->validated());
+
+        return redirect()
+            ->route('subscriptions.index')
+            ->with('success', 'تم إنشاء الاشتراك بنجاح.');
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * عرض تفاصيل اشتراك (تستخدم برضو لطباعة الإيصال).
      */
-    public function edit(string $id)
+    public function show(Subscription $subscription): View
     {
-        //
+        $subscription->load(['member', 'plan', 'offer', 'payments']);
+
+        return view('admin.subscriptions.show', compact('subscription'));
     }
 
     /**
-     * Update the specified resource in storage.
+     * حذف اشتراك.
      */
-    public function update(Request $request, string $id)
+    public function destroy(Subscription $subscription): RedirectResponse
     {
-        //
+        $this->subscriptionService->delete($subscription);
+
+        return redirect()
+            ->route('subscriptions.index')
+            ->with('success', 'تم حذف الاشتراك بنجاح.');
+    }
+
+    /* ══════════════════════════ Actions إضافية ══════════════════════════ */
+
+    /**
+     * تجديد الاشتراك.
+     */
+    public function renew(Subscription $subscription): RedirectResponse
+    {
+        $this->subscriptionService->renewSubscription($subscription);
+
+        return redirect()
+            ->route('subscriptions.index')
+            ->with('success', 'تم تجديد الاشتراك بنجاح.');
     }
 
     /**
-     * Remove the specified resource from storage.
+     * تجميد الاشتراك.
      */
-    public function destroy(string $id)
+    public function freeze(Subscription $subscription): RedirectResponse
     {
-        //
+        $this->subscriptionService->freezeSubscription($subscription);
+
+        return redirect()
+            ->route('subscriptions.index')
+            ->with('success', 'تم تجميد الاشتراك.');
+    }
+
+    /**
+     * إلغاء تجميد الاشتراك.
+     */
+    public function unfreeze(Subscription $subscription): RedirectResponse
+    {
+        $this->subscriptionService->unfreezeSubscription($subscription);
+
+        return redirect()
+            ->route('subscriptions.index')
+            ->with('success', 'تم إلغاء تجميد الاشتراك.');
+    }
+
+    /**
+     * إلغاء الاشتراك نهائيًا.
+     */
+    public function cancel(Subscription $subscription): RedirectResponse
+    {
+        $this->subscriptionService->cancelSubscription($subscription);
+
+        return redirect()
+            ->route('subscriptions.index')
+            ->with('success', 'تم إلغاء الاشتراك.');
+    }
+
+    /**
+     * طباعة إيصال الاشتراك.
+     */
+    public function printReceipt(Subscription $subscription): View
+    {
+        $subscription->load(['member', 'plan', 'offer', 'payments']);
+
+        return view('admin.subscriptions.receipt', compact('subscription'));
     }
 }

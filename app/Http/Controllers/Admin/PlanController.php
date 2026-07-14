@@ -4,62 +4,81 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-
+use App\Services\PlanService;
+use App\Models\Plan;
+use App\Http\Requests\StorePlanRequest;
+use App\Http\Requests\UpdatePlanRequest;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Response;
+use Illuminate\Contracts\View\View;
 class PlanController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function __construct(protected PlanService $planService)
     {
-        //
     }
-
+ 
     /**
-     * Show the form for creating a new resource.
+     * عرض قائمة الخطط.
      */
-    public function create()
+    public function index(): View
     {
-        //
+        $plans = $this->planService->list(
+            search: request('search'),
+            perPage: (int) request('per_page', 32),
+        );
+ 
+        return view('admin.plans.index', compact('plans'));
     }
-
+ 
     /**
-     * Store a newly created resource in storage.
+     * عرض فورم إضافة خطة جديدة.
      */
-    public function store(Request $request)
+    public function create(): View
     {
-        //
+        return view('admin.plans.create');
     }
-
+ 
     /**
-     * Display the specified resource.
+     * حفظ خطة جديدة.
      */
-    public function show(string $id)
+    public function store(StorePlanRequest $request): RedirectResponse
     {
-        //
+        $this->planService->create($request->validated());
+ 
+        return redirect()
+            ->route('plans.index')
+            ->with('success', 'تم إضافة الخطة بنجاح.');
     }
-
+ 
     /**
-     * Show the form for editing the specified resource.
+     * عرض فورم تعديل خطة.
      */
-    public function edit(string $id)
+    public function edit(Plan $plan): View
     {
-        //
+        return view('admin.plans.edit', compact('plan'));
     }
-
+ 
     /**
-     * Update the specified resource in storage.
+     * تحديث بيانات خطة.
      */
-    public function update(Request $request, string $id)
+    public function update(UpdatePlanRequest $request, Plan $plan): RedirectResponse
     {
-        //
+        $this->planService->update($plan, $request->validated());
+ 
+        return redirect()
+            ->route('plans.index')
+            ->with('success', 'تم تحديث الخطة بنجاح.');
     }
-
+ 
     /**
-     * Remove the specified resource from storage.
+     * حذف خطة.
      */
-    public function destroy(string $id)
+    public function destroy(Plan $plan): RedirectResponse
     {
-        //
+        $this->planService->delete($plan);
+ 
+        return redirect()
+            ->route('plans.index')
+            ->with('success', 'تم حذف الخطة بنجاح.');
     }
 }

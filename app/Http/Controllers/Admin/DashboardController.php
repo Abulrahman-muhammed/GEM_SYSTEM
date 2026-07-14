@@ -3,11 +3,17 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Services\DashboardService;
+use Illuminate\View\View;
 
 class DashboardController extends Controller
 {
-    public function index(){
-        return view('Admin.home');
+    public function __construct(protected DashboardService $dashboardService)
+    {
+    }
+
+    public function index(): View
+    {
+        return view('Admin.home', $this->dashboardService->getData());
     }
 }

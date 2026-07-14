@@ -3,63 +3,81 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Services\OfferService;
+use App\Http\Requests\StoreOfferRequest;
+use App\Http\Requests\UpdateOfferRequest;
+use App\Models\Offer;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\View\View;
 
 class OfferController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function __construct(protected OfferService $offerService)
     {
-        //
     }
-
+ 
     /**
-     * Show the form for creating a new resource.
+     * عرض قائمة العروض.
      */
-    public function create()
+    public function index(): View
     {
-        //
+        $offers = $this->offerService->list(
+            search: request('search'),
+            perPage: (int) request('per_page', 32),
+        );
+ 
+        return view('admin.offers.index', compact('offers'));
     }
-
+ 
     /**
-     * Store a newly created resource in storage.
+     * عرض فورم إضافة عرض جديد.
      */
-    public function store(Request $request)
+    public function create(): View
     {
-        //
+        return view('admin.offers.create');
     }
-
+ 
     /**
-     * Display the specified resource.
+     * حفظ عرض جديد.
      */
-    public function show(string $id)
+    public function store(StoreOfferRequest $request): RedirectResponse
     {
-        //
+        $this->offerService->create($request->validated());
+ 
+        return redirect()
+            ->route('offers.index')
+            ->with('success', 'تم إضافة العرض بنجاح.');
     }
-
+ 
     /**
-     * Show the form for editing the specified resource.
+     * عرض فورم تعديل عرض.
      */
-    public function edit(string $id)
+    public function edit(Offer $offer): View
     {
-        //
+        return view('admin.offers.edit', compact('offer'));
     }
-
+ 
     /**
-     * Update the specified resource in storage.
+     * تحديث بيانات عرض.
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateOfferRequest $request, Offer $offer): RedirectResponse
     {
-        //
+        $this->offerService->update($offer, $request->validated());
+ 
+        return redirect()
+            ->route('offers.index')
+            ->with('success', 'تم تحديث العرض بنجاح.');
     }
-
+ 
     /**
-     * Remove the specified resource from storage.
+     * حذف عرض.
      */
-    public function destroy(string $id)
+    public function destroy(Offer $offer): RedirectResponse
     {
-        //
+        $this->offerService->delete($offer);
+ 
+        return redirect()
+            ->route('offers.index')
+            ->with('success', 'تم حذف العرض بنجاح.');
     }
 }

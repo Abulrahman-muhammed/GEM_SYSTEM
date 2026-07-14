@@ -4,31 +4,34 @@ namespace App\Enums;
 
 enum PaymentMethod: string
 {
-    case CASH = 'cash';
-    case VISA = 'visa';
-    case WALLET = 'wallet';
-
+    case CASH          = 'cash';
+    case VODAFONE_CASH  = 'vodafone_cash';
+    case INSTAPAY      = 'instapay';
+    case CARD          = 'card';
+ 
+    /**
+     * الاسم المعروض بالعربي.
+     */
     public function label(): string
     {
         return match ($this) {
-            self::CASH => 'كاش',
-            self::VISA => 'فيزا',
-            self::WALLET => 'محفظة إلكترونية',
+            self::CASH          => 'كاش',
+            self::VODAFONE_CASH => 'فودافون كاش',
+            self::INSTAPAY      => 'إنستاباي',
+            self::CARD          => 'بطاقة',
         };
     }
-
-    public static function options(): array
+ 
+    /**
+     * أيقونة Feather مناسبة لكل طريقة دفع.
+     */
+    public function icon(): string
     {
-        return array_column(
-            array_map(
-                fn ($case) => [
-                    'value' => $case->value,
-                    'label' => $case->label(),
-                ],
-                self::cases()
-            ),
-            'label',
-            'value'
-        );
+        return match ($this) {
+            self::CASH          => 'fe-dollar-sign',
+            self::VODAFONE_CASH => 'fe-smartphone',
+            self::INSTAPAY      => 'fe-send',
+            self::CARD          => 'fe-credit-card',
+        };
     }
 }

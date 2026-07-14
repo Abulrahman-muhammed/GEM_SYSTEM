@@ -7,6 +7,12 @@ use Illuminate\Support\Facades\Storage;
 
 class MemberService
 {
+    private BarcodeService $barcodeService;
+
+    public function __construct(BarcodeService $barcodeService)
+    {
+        $this->barcodeService = $barcodeService;
+    }
     public function create(array $data): Member
     {
         if (isset($data['photo'])) {
@@ -14,7 +20,7 @@ class MemberService
                 ->store('members', 'public');
         }
 
-        return Member::create($data);
+        return  Member::create($data);
     }
 
     public function update(Member $member, array $data): Member
@@ -34,7 +40,7 @@ class MemberService
 
         return $member;
     }
-
+    
     public function delete(Member $member): void
     {
         if ($member->photo) {

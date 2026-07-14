@@ -10,7 +10,7 @@ use App\Http\Controllers\Admin\OfferController;
 use App\Http\Controllers\Admin\SubscriptionController;
 use App\Http\Controllers\Admin\PaymentController;
 use App\Http\Controllers\Admin\AttendanceController;
-
+use App\Http\Controllers\Admin\ReportController;
 
 
 Route::middleware('auth')->group(function () {
@@ -24,12 +24,38 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('offers', OfferController::class);
 
-    Route::resource('subscriptions', SubscriptionController::class);
-
     Route::resource('payments', PaymentController::class);
-
-    Route::resource('attendances', AttendanceController::class);
-
+    
+    Route::controller(SubscriptionController::class)
+        ->prefix('subscriptions')->name('subscriptions.')->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('/create', 'create')->name('create');
+            Route::post('/', 'store')->name('store');
+            Route::get('/{subscription}', 'show')->name('show');
+            Route::delete('/{subscription}', 'destroy')->name('destroy');
+            Route::post('/{subscription}/renew', 'renew')->name('renew');
+            Route::post('/{subscription}/freeze', 'freeze')->name('freeze');
+            Route::post('/{subscription}/unfreeze', 'unfreeze')->name('unfreeze');
+            Route::post('/{subscription}/cancel', 'cancel')->name('cancel');
+            Route::get('/{subscription}/receipt', 'printReceipt')->name('receipt');
+        });
+    Route::prefix('attendances')->name('attendances.')->group(function () {
+ 
+    // شاشة السكانر (الريسبشن)
+    Route::get('/scan', [AttendanceController::class, 'scanPage'])->name('scan');
+    Route::post('/scan', [AttendanceController::class, 'scan'])->name('scan.store');
+ 
+    // سجل الحضور والانصراف
+    Route::get('/', [AttendanceController::class, 'index'])->name('index');
+    Route::delete('/{attendance}', [AttendanceController::class, 'destroy'])->name('destroy');
+    Route::patch('/{attendance}/force-checkout', [AttendanceController::class, 'forceCheckout'])->name('force-checkout');
+        });
+    Route::controller(ReportController::class)
+        ->prefix('reports')->name('reports.')->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('/members/export/excel', 'exportMembersExcel')->name('members.export.excel');
+            Route::get('/members/export/pdf', 'exportMembersPdf')->name('members.export.pdf');
+        });
 });
 
 
