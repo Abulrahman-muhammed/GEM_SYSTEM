@@ -9,6 +9,7 @@ use App\Http\Requests\UpdateMemberRequest;
 use App\Models\Member;
 use App\Services\MemberService;
 use App\Services\BarcodeService;
+
 use App\Models\Attendance;
 class MemberController extends Controller
 {
@@ -127,5 +128,12 @@ class MemberController extends Controller
         return redirect()
             ->route('members.index')
             ->with('success', 'تم حذف العضو بنجاح');
+    }
+    public function card(Member $member, BarcodeService $barcodeService)
+    {
+        return view('admin.pdf.membership-card', [
+            'member' => $member,
+            'barcode' => $barcodeService->renderSvg($member->barcode),
+        ]);
     }
 }

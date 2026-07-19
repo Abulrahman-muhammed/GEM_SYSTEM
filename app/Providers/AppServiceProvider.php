@@ -3,9 +3,12 @@
 namespace App\Providers;
 
 use App\Models\Member;
+use App\Models\Payment;
 use App\Observers\MemberObserver;
+use App\Observers\PaymentObserver;
 use Illuminate\Support\ServiceProvider;
-
+use Illuminate\Support\Facades\View;
+use App\Settings\GeneralSettings;
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -22,5 +25,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Member::observe(MemberObserver::class);
+        Payment::observe(PaymentObserver::class);
+        view::share('settings', $this->app->make(GeneralSettings::class));
     }
 }

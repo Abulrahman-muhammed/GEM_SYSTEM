@@ -113,8 +113,8 @@
                               <i class="fe fe-more-vertical"></i>
                             </button>
                             <div class="dropdown-menu dropdown-menu-right">
-                              <a class="dropdown-item" href="{{ route('subscriptions.receipt', $subscription) }}" target="_blank">
-                                <i class="fe fe-printer mr-1"></i> طباعة إيصال
+                              <a class="dropdown-item" href="{{ route('payments.invoice.print', $subscription->payments->first()) }}" target="_blank">
+                                <i class="fe fe-printer mr-1"></i> طباعة فاتورة
                               </a>
 
                               @if ($subscription->status->value !== 'cancelled')

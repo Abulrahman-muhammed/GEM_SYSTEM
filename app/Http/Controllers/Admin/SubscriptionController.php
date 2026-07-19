@@ -127,13 +127,5 @@ class SubscriptionController extends Controller
             ->with('success', 'تم إلغاء الاشتراك.');
     }
 
-    /**
-     * طباعة إيصال الاشتراك.
-     */
-    public function printReceipt(Subscription $subscription): View
-    {
-        $subscription->load(['member', 'plan', 'offer', 'payments']);
 
-        return view('admin.subscriptions.receipt', compact('subscription'));
-    }
 }

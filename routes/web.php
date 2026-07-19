@@ -11,14 +11,15 @@ use App\Http\Controllers\Admin\SubscriptionController;
 use App\Http\Controllers\Admin\PaymentController;
 use App\Http\Controllers\Admin\AttendanceController;
 use App\Http\Controllers\Admin\ReportController;
-
-
+use App\Http\Controllers\Admin\SettingsController;
+use App\Http\Controllers\Admin\InvoiceController;
 Route::middleware('auth')->group(function () {
 
     Route::get('/', [DashboardController::class, 'index'])
         ->name('dashboard');
 
     Route::resource('members', MemberController::class);
+    Route::get('/members/{member}/card',[MemberController::class, 'card'])->name('members.card');
 
     Route::resource('plans', PlanController::class);
 
@@ -37,7 +38,6 @@ Route::middleware('auth')->group(function () {
             Route::post('/{subscription}/freeze', 'freeze')->name('freeze');
             Route::post('/{subscription}/unfreeze', 'unfreeze')->name('unfreeze');
             Route::post('/{subscription}/cancel', 'cancel')->name('cancel');
-            Route::get('/{subscription}/receipt', 'printReceipt')->name('receipt');
         });
     Route::prefix('attendances')->name('attendances.')->group(function () {
  
@@ -56,6 +56,33 @@ Route::middleware('auth')->group(function () {
             Route::get('/members/export/excel', 'exportMembersExcel')->name('members.export.excel');
             Route::get('/members/export/pdf', 'exportMembersPdf')->name('members.export.pdf');
         });
+    Route::prefix('settings')
+    ->name('settings.')
+    ->group(function () {
+
+        Route::get(
+            '/',
+            [SettingsController::class,'edit']
+        )->name('edit');
+
+        Route::put(
+            '/',
+            [SettingsController::class,'update']
+        )->name('update');
+    });
+    Route::prefix('payments/{payment}/invoice')
+    ->name('payments.invoice.')
+    ->group(function () {
+
+        Route::get('/print', [InvoiceController::class, 'print'])
+            ->name('print');
+
+        Route::get('/pdf', [InvoiceController::class, 'pdf'])
+            ->name('pdf');
+
+        Route::get('/download', [InvoiceController::class, 'download'])
+            ->name('download');
+    });
 });
 
 

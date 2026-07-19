@@ -21,4 +21,10 @@
     <!-- App CSS -->
     <link rel="stylesheet" href="{{ asset('css/app-light.css') }}" id="lightTheme">
     <link rel="stylesheet" href="{{ asset('css/app-dark.css') }}" id="darkTheme" disabled>
+    <!-- logo -->
+    @if($settings->logo)
+        <link rel="icon" href="{{ asset('storage/' . $settings->logo) }}">
+    @else
+        <link rel="icon" href="{{ asset('favicon.ico') }}">
+    @endif
     @stack('styles')

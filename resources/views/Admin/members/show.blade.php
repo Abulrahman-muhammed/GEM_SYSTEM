@@ -120,15 +120,10 @@
                     <a href="{{ route('members.edit', $member) }}" class="btn btn-outline-primary btn-block mb-2">
                       <i class="fe fe-edit"></i> تعديل بيانات العضو
                     </a>
+                    <a href="{{ route('members.card', $member) }}" target="_blank" class="btn btn-secondary btn-block mb-2">
+                      <i class="fe fe-download"></i>                   طباعة الكارت
 
-                    <button type="button" class="btn btn-outline-secondary btn-block mb-2" onclick="window.print()">
-                      <i class="fe fe-printer"></i> طباعة الكارت
-                    </button>
-
-                    <button type="button" class="btn btn-outline-secondary btn-block mb-2" disabled
-                            title="سيتم تفعيله لاحقًا">
-                      <i class="fe fe-download"></i> تحميل PDF
-                    </button>
+                    </a>
 
                     <form action="{{ route('members.destroy', $member) }}" method="POST" class="delete-member-form">
                       @csrf

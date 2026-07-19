@@ -91,6 +91,14 @@
                           <small class="text-muted">{{ $payment->notes ?? '—' }}</small>
                         </td>
                         <td class="text-center">
+                            @if ($payment->subscription && $payment->subscription->member)
+                              <a href="{{ route('payments.invoice.print', $payment) }}"
+                                class="btn btn-sm btn-icon btn-outline-primary"
+                                title="عرض فاتورة"
+                                target="_blank">
+                                  <i class="fe fe-printer"></i>
+                              </a>
+                          @endif
                           <form action="{{ route('payments.destroy', $payment) }}" method="POST"
                                 class="d-inline delete-payment-form">
                             @csrf

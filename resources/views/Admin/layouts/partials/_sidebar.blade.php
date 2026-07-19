@@ -96,7 +96,7 @@
                     'title' => 'الإعدادات',
                     'icon'  => 'fe-settings',
                     'children' => [
-                        ['title' => 'بيانات الجيم',    'route' => 'dashboard'],
+                        ['title' => 'بيانات الجيم',    'route' => 'settings.edit'],
                         ['title' => 'المستخدمون',      'route' => 'dashboard'],
                         ['title' => 'النسخ الاحتياطي', 'route' => 'dashboard'],
                     ],
