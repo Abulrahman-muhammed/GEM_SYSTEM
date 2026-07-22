@@ -1,8 +1,5 @@
-{{-- resources/views/admin/plans/_form.blade.php --}}
-
 @push('styles')
 <style>
-    /* Grid ثابت مش معتمد على Bootstrap RTL، بيضمن عمودين متساويين دايمًا */
     .form-grid-2 {
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -47,16 +44,16 @@
 
     {{-- الحالة --}}
     <div>
-        <label class="form-label font-weight-bold d-block">الحالة</label>
-        <div class="form-check form-switch mt-2">
-            <input type="checkbox" class="form-check-input" id="status" name="status" value="1"
-                   @checked(old('status', $plan->status ?? true))>
-            <label class="form-check-label" for="status">الخطة نشطة</label>
+        <label class="form-label font-weight-bold d-block">حالة الخطة</label>
+        <div class="custom-control custom-switch custom-switch-lg mt-2">
+            <input type="hidden" name="status" value="0">
+            <input type="checkbox" class="custom-control-input" id="status" name="status" value="1" @checked(old('status', $plan->status ?? true)) style="width: 3.5rem; height: 1.75rem; cursor: pointer;">
+            <label class="custom-control-label ms-2" for="status" style="cursor: pointer; padding-top: 0.2rem;">الخطة نشطة حالياً</label>
         </div>
     </div>
 </div>
 
-{{-- الوصف --}}
+{{-- الوصف (خارج الـ Grid ليكون بعرض الصفحة بالكامل) --}}
 <div class="mb-3">
     <label class="form-label font-weight-bold">الوصف</label>
     <textarea rows="3" name="description"
@@ -66,7 +63,7 @@
 </div>
 
 <div class="d-flex justify-content-start gap-2 mt-4">
-    <button class="btn btn-primary">
+    <button type="submit" class="btn btn-primary">
         <i class="fe fe-save"></i>
         {{ isset($plan) ? 'حفظ التعديلات' : 'حفظ الخطة' }}
     </button>

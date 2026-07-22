@@ -3,34 +3,38 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Services\OfferService;
+use App\Services\SearchService;
 use App\Http\Requests\StoreOfferRequest;
 use App\Http\Requests\UpdateOfferRequest;
 use App\Models\Offer;
+use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
 class OfferController extends Controller
 {
-    public function __construct(protected OfferService $offerService)
+    public function __construct(protected SearchService $searchService )  
     {
     }
  
     /**
-     * عرض قائمة العروض.
+     *  Display offers.
      */
-    public function index(): View
+    public function index(Request $request): View
     {
-        $offers = $this->offerService->list(
-            search: request('search'),
-            perPage: (int) request('per_page', 32),
-        );
+        $offers = $this->searchService->apply(
+            Offer::query(),
+            $request->search,
+            [
+                'name',
+            ]
+        )->paginate(request('per_page', 10));
  
         return view('admin.offers.index', compact('offers'));
     }
  
     /**
-     * عرض فورم إضافة عرض جديد.
+     * Display offers create page.
      */
     public function create(): View
     {
@@ -38,19 +42,18 @@ class OfferController extends Controller
     }
  
     /**
-     * حفظ عرض جديد.
+     *  Store offer.
      */
     public function store(StoreOfferRequest $request): RedirectResponse
     {
-        $this->offerService->create($request->validated());
- 
+        Offer::create($request->validated());
         return redirect()
             ->route('offers.index')
             ->with('success', 'تم إضافة العرض بنجاح.');
     }
  
     /**
-     * عرض فورم تعديل عرض.
+     * Display offers edit page.
      */
     public function edit(Offer $offer): View
     {
@@ -58,11 +61,11 @@ class OfferController extends Controller
     }
  
     /**
-     * تحديث بيانات عرض.
+     * Update offer.
      */
     public function update(UpdateOfferRequest $request, Offer $offer): RedirectResponse
     {
-        $this->offerService->update($offer, $request->validated());
+        $offer->update($request->validated());
  
         return redirect()
             ->route('offers.index')
@@ -70,12 +73,11 @@ class OfferController extends Controller
     }
  
     /**
-     * حذف عرض.
+     * Delete offer.
      */
     public function destroy(Offer $offer): RedirectResponse
     {
-        $this->offerService->delete($offer);
- 
+        $offer->delete();
         return redirect()
             ->route('offers.index')
             ->with('success', 'تم حذف العرض بنجاح.');

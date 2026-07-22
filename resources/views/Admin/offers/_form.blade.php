@@ -55,16 +55,6 @@
         @error('discount_value') <div class="invalid-feedback">{{ $message }}</div> @enderror
     </div>
 
-    {{-- الحالة --}}
-    <div>
-        <label class="form-label font-weight-bold d-block">الحالة</label>
-        <div class="form-check form-switch mt-2">
-            <input type="checkbox" class="form-check-input" id="status" name="status" value="1"
-                   @checked(old('status', $offer->status ?? true))>
-            <label class="form-check-label" for="status">العرض نشط</label>
-        </div>
-    </div>
-
     {{-- تاريخ البداية --}}
     <div>
         <label class="form-label font-weight-bold">تاريخ البداية <span class="text-danger">*</span></label>
@@ -82,6 +72,16 @@
                value="{{ old('end_date', isset($offer->end_date) ? $offer->end_date->format('Y-m-d') : '') }}">
         @error('end_date') <div class="invalid-feedback">{{ $message }}</div> @enderror
     </div>
+
+    {{-- الحالة --}}
+    <div>
+        <label class="form-label font-weight-bold d-block">الحالة</label>
+        <div class="custom-control custom-switch custom-switch-lg mt-2">
+            <input type="hidden" name="status" value="0">
+            <input type="checkbox" class="custom-control-input" id="status" name="status" value="1" @checked(old('status', $offer->status ?? true)) style="width: 3.5rem; height: 1.75rem; cursor: pointer;">
+            <label class="custom-control-label ms-2" for="status" style="cursor: pointer; padding-top: 0.2rem;">العرض نشط حالياً</label>
+        </div>
+    </div>
 </div>
 
 {{-- الوصف --}}
@@ -94,7 +94,7 @@
 </div>
 
 <div class="d-flex justify-content-start gap-2 mt-4">
-    <button class="btn btn-primary">
+    <button type="submit" class="btn btn-primary">
         <i class="fe fe-save"></i>
         {{ isset($offer) ? 'حفظ التعديلات' : 'حفظ العرض' }}
     </button>

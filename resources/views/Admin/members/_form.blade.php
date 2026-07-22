@@ -69,9 +69,11 @@
 </div>
 
 <div class="mb-4">
-    <div class="form-check form-switch">
-        <input type="checkbox" class="form-check-input" id="status" name="status" value="1" @checked(old('status', $member->status ?? true))>
-        <label class="form-check-label" for="status">العضو نشط حالياً</label>
+    <div class="custom-control custom-switch custom-switch-lg">
+        <!-- Hidden input يضمن إرسال قيمة 0 لو الـ Checkbox غير مفعّل -->
+        <input type="hidden" name="status" value="0">
+        <input type="checkbox" class="custom-control-input" id="status" name="status" value="1" @checked(old('status', $member->status ?? true)) style="width: 3.5rem; height: 1.75rem; cursor: pointer;">
+        <label class="custom-control-label" for="status" style="cursor: pointer; padding-top: 0.2rem;">العضو نشط حالياً</label>
     </div>
 </div>
 
