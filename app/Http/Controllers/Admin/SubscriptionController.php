@@ -11,7 +11,7 @@ use App\Models\Subscription;
 use App\Services\SubscriptionService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
-
+use Illuminate\Http\Request;
 class SubscriptionController extends Controller
 {
     public function __construct(protected SubscriptionService $subscriptionService)
@@ -34,13 +34,17 @@ class SubscriptionController extends Controller
     /**
      * عرض فورم إضافة اشتراك جديد.
      */
-    public function create(): View
-    {
+    public function create(Request $request): View
+    {        
+        $member = null;
+        if ($request->filled('member')) {
+            $member = Member::findOrFail($request->member);
+        }
         $members = Member::orderBy('full_name')->get(['id', 'full_name', 'phone']);
         $plans   = Plan::active()->orderBy('name')->get(['id', 'name', 'price', 'duration_days']);
         $offers  = Offer::active()->orderBy('name')->get(['id', 'name', 'discount_type', 'discount_value']);
 
-        return view('admin.subscriptions.create', compact('members', 'plans', 'offers'));
+        return view('admin.subscriptions.create', compact('members', 'plans', 'offers','member'));
     }
 
     /**
@@ -94,13 +98,18 @@ class SubscriptionController extends Controller
     /**
      * تجميد الاشتراك.
      */
-    public function freeze(Subscription $subscription): RedirectResponse
+    public function freeze(Request $request, Subscription $subscription)
     {
-        $this->subscriptionService->freezeSubscription($subscription);
+        $request->validate([
+            'reason' => ['nullable', 'string', 'max:255'],
+        ]);
 
-        return redirect()
-            ->route('subscriptions.index')
-            ->with('success', 'تم تجميد الاشتراك.');
+        $this->subscriptionService->freezeSubscription(
+            $subscription,
+            $request->only('reason')
+        );
+
+        return back()->with('success', 'تم تجميد الاشتراك بنجاح.');
     }
 
     /**

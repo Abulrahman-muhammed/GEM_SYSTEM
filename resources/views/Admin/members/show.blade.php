@@ -7,10 +7,6 @@
       <div class="row">
         <div class="col-md-12 my-4">
 
-          @if (session('success'))
-            <div class="alert alert-success">{{ session('success') }}</div>
-          @endif
-
           <div class="d-flex align-items-center mb-3">
             <a href="{{ route('members.index') }}" class="btn btn-sm btn-outline-secondary mr-2">
               <i class="fe fe-arrow-right"></i> رجوع للأعضاء
@@ -27,7 +23,7 @@
                   </div>
                   <div>
                     <h5 class="mb-0">معلومات العضو</h5>
-                    <small class="text-muted">عضو #{{ $member->id }}</small>
+                    <small class="text-muted">عضو #{{ $member->barcode }}</small>
                   </div>
                 </div>
 
@@ -301,158 +297,7 @@
 @endsection
 
 @push('styles')
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-<style>
-  .icon-circle {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 20px;
-  }
-
-  .bg-primary-soft {
-    background-color: rgba(13, 110, 253, .1);
-  }
-
-  .card {
-    border-radius: .9rem;
-    overflow: hidden;
-  }
-
-  .profile-avatar {
-    width: 72px;
-    height: 72px;
-    object-fit: cover;
-    border: 2px solid #fff;
-    box-shadow: 0 0 0 1px #eef0f4;
-  }
-
-  .badge-status {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    padding: .4rem .75rem;
-    font-weight: 500;
-    font-size: .78rem;
-  }
-
-  .badge-status-active {
-    background-color: rgba(25, 135, 84, .12);
-    color: #198754;
-  }
-
-  .badge-status-inactive {
-    background-color: rgba(108, 117, 125, .12);
-    color: #6c757d;
-  }
-
-  .info-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem 1.5rem;
-  }
-
-  .info-item-full {
-    grid-column: 1 / -1;
-  }
-
-  .info-label {
-    display: block;
-    color: #6b7280;
-    font-size: .78rem;
-    text-transform: uppercase;
-    letter-spacing: .04em;
-    margin-bottom: 4px;
-  }
-
-  .info-value {
-    display: block;
-    font-weight: 600;
-    color: #1f2937;
-  }
-
-  .phone-link {
-    color: #1f2937;
-    text-decoration: none;
-  }
-
-  .phone-link:hover {
-    color: #0d6efd;
-  }
-
-  .notes-box {
-    background: #f8f9fc;
-    border-radius: .6rem;
-    padding: 1rem;
-    font-size: .9rem;
-  }
-
-  .barcode-wrapper svg {
-    max-width: 100%;
-    height: auto;
-  }
-
-  .barcode-code {
-    font-family: monospace;
-    letter-spacing: .1em;
-    color: #6b7280;
-    font-size: .9rem;
-  }
-
-  .action-buttons .btn {
-    text-align: right;
-    border-radius: .5rem;
-    padding: .65rem 1rem;
-  }
-
-  .action-buttons .btn i {
-    margin-left: 8px;
-  }
-
-  .payment-row {
-    padding: .9rem 1.25rem;
-    border-bottom: 1px solid #f1f3f8;
-  }
-
-  .payment-row:last-child {
-    border-bottom: none;
-  }
-
-  .attendance-row {
-    padding: .9rem 1.25rem;
-    border-bottom: 1px solid #f1f3f8;
-  }
-
-  .attendance-row:last-child {
-    border-bottom: none;
-  }
-
-  .attendance-date-badge {
-    width: 46px;
-    height: 46px;
-    border-radius: .6rem;
-    background: #f8f9fc;
-    color: #1f2937;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    font-size: .95rem;
-    margin-left: 14px;
-    flex-shrink: 0;
-  }
-
-  .attendance-date-badge small {
-    font-weight: 500;
-    font-size: .65rem;
-    color: #6b7280;
-    text-transform: uppercase;
-  }
-</style>
+  <link rel="stylesheet" href="{{ asset('css/custom/member-show.css') }}">
 @endpush
 
 @push('scripts')

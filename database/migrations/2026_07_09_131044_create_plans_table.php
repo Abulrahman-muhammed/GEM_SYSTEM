@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('plans', function (Blueprint $table) {
             $table->id();
 
-            $table->string('name');
+            $table->string('name')->index();
 
             $table->decimal('price',10,2);
 
@@ -22,7 +22,7 @@ return new class extends Migration
 
             $table->text('description')->nullable();
 
-            $table->boolean('status')->default(true);
+            $table->boolean('status')->default(true)->index();
 
             $table->timestamps();
         });

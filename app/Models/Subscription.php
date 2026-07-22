@@ -55,7 +55,10 @@ class Subscription extends Model
     {
         return $this->hasMany(Payment::class);
     }
- 
+    public function freezes()
+    {
+        return $this->hasMany(SubscriptionFreeze::class);
+    }
     /* ══════════════════════════ Accessors ══════════════════════════ */
  
     /**

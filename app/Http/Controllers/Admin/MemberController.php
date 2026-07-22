@@ -24,9 +24,9 @@ class MemberController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $members = Member::latest()->paginate(10);
+        $members = $this->memberService->list($request);
         return view('admin.members.index', compact('members'));
     }
 
@@ -43,57 +43,16 @@ class MemberController extends Controller
      */
     public function store(StoreMemberRequest $request)
     {
-        $validated = $request->validated();
-
-        $this->memberService->create($validated);
-
-        return redirect()
-            ->route('members.index')
-            ->with('success', 'تم إضافة العضو بنجاح');
+        $this->memberService->create($request->validated());
+        return redirect()->route('members.index')->with('success', 'تم إضافة العضو بنجاح');
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(Member $member, BarcodeService $barcodeService)
+    public function show(Member $member)
     {
-        $member->load([
-            'subscriptions' => fn ($q) => $q->with(['plan', 'payments'])->latest('start_date'),
-        ]);
-    
-        $today = now()->startOfDay();
-    
-        // الاشتراك الحالي = الأقرب لتاريخ نهاية لسه ماخلصش، وإلا آخر اشتراك موجود
-        $currentSubscription = $member->subscriptions
-            ->sortByDesc('end_date')
-            ->first(fn ($s) => $s->end_date && $s->end_date->gte($today))
-            ?? $member->subscriptions->sortByDesc('end_date')->first();
-    
-        // آخر 5 مدفوعات من كل اشتراكات العضو
-        $recentPayments = $member->subscriptions
-            ->flatMap->payments
-            ->sortByDesc('payment_date')
-            ->take(5)
-            ->values();
-        $recentAttendances = Attendance::where('member_id', $member->id)
-        ->latest('date')
-        ->latest('check_in')
-        ->limit(5)
-        ->get();
-        $attendanceStats = [
-        'total_visits' => Attendance::where('member_id', $member->id)->count(),
-        'last_visit'   => Attendance::where('member_id', $member->id)
-            ->latest('check_in')
-            ->value('check_in'),
-        ];
-        return view('admin.members.show', [
-            'member'              => $member,
-            'barcode'             => $barcodeService->renderSvg($member->barcode),
-            'currentSubscription' => $currentSubscription,
-            'recentPayments'      => $recentPayments,
-            'recentAttendances'   => $recentAttendances,
-            'attendanceStats'     => $attendanceStats,
-        ]);
+        return view('admin.members.show',$this->memberService->profile($member));
     }
 
     /**

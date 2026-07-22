@@ -29,7 +29,9 @@ return new class extends Migration
 
             $table->text('description')->nullable();
 
-            $table->boolean('status')->default(true);
+            $table->boolean('status')->default(true)->index();
+            
+            $table->index(['name', 'start_date','end_date']);
 
             $table->timestamps();
 

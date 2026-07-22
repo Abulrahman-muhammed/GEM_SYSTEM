@@ -113,9 +113,11 @@
                               <i class="fe fe-more-vertical"></i>
                             </button>
                             <div class="dropdown-menu dropdown-menu-right">
-                              <a class="dropdown-item" href="{{ route('payments.invoice.print', $subscription->payments->first()) }}" target="_blank">
-                                <i class="fe fe-printer mr-1"></i> طباعة فاتورة
-                              </a>
+                              @if ($subscription->payments->isNotEmpty())
+                                <a class="dropdown-item" href="{{ route('payments.invoice.print', $subscription->payments->first()) }}" target="_blank">
+                                  <i class="fe fe-printer mr-1"></i> طباعة فاتورة
+                                </a>
+                              @endif
 
                               @if ($subscription->status->value !== 'cancelled')
                                 <form action="{{ route('subscriptions.renew', $subscription) }}" method="POST">
@@ -127,12 +129,12 @@
                               @endif
 
                               @if ($subscription->status->value === 'active')
-                                <form action="{{ route('subscriptions.freeze', $subscription) }}" method="POST">
-                                  @csrf
-                                  <button type="submit" class="dropdown-item">
+                                  <button type="button" class="dropdown-item btn-freeze-subscription"
+                                          data-url="{{ route('subscriptions.freeze', $subscription) }}"
+                                          data-name="{{ $subscription->member->full_name }}"
+                                          data-end-date="{{ $subscription->end_date->format('Y-m-d') }}">
                                     <i class="fe fe-pause mr-1"></i> تجميد الاشتراك
                                   </button>
-                                </form>
                               @elseif ($subscription->status->value === 'frozen')
                                 <form action="{{ route('subscriptions.unfreeze', $subscription) }}" method="POST">
                                   @csrf
@@ -184,6 +186,43 @@
 
         </div>
       </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal fade" id="freezeModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <form id="freezeForm" method="POST">
+        @csrf
+        <div class="modal-header">
+          <h5 class="modal-title">تجميد الاشتراك</h5>
+          <button type="button" class="close" data-dismiss="modal">
+            <span>&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p class="mb-3">
+            العضو: <strong id="freezeMemberName"></strong><br>
+            الاشتراك ينتهي: <strong id="freezeEndDate"></strong>
+          </p>
+
+          <div class="mb-3">
+            <label class="form-label">سبب التجميد (اختياري)</label>
+            <textarea class="form-control" name="reason" rows="3"
+                      placeholder="مثال: سفر، إصابة، ظروف شخصية..."></textarea>
+          </div>
+
+          <div class="alert alert-warning mb-0 py-2 px-3" style="font-size:.85rem;">
+            ⚠️ سيتم تمديد تاريخ انتهاء الاشتراك بعدد أيام التجميد عند إلغاء التجميد.
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">إلغاء</button>
+          <button type="submit" class="btn btn-warning">تجميد الاشتراك</button>
+        </div>
+      </form>
     </div>
   </div>
 </div>
@@ -280,7 +319,16 @@
 
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
+  document.querySelectorAll('.btn-freeze-subscription').forEach(function (btn) {
+  btn.addEventListener('click', function () {
+    document.getElementById('freezeMemberName').textContent = btn.getAttribute('data-name');
+    document.getElementById('freezeEndDate').textContent = btn.getAttribute('data-end-date');
+    document.getElementById('freezeForm').action = btn.getAttribute('data-url');
+    $('#freezeModal').modal('show');
+    });
+  });
   document.addEventListener('DOMContentLoaded', function () {
 
     document.querySelectorAll('.btn-delete-subscription').forEach(function (btn) {

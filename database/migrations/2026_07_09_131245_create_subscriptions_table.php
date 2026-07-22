@@ -31,13 +31,16 @@ return new class extends Migration
 
         $table->decimal('discount',10,2)->default(0);
 
-        $table->decimal('final_price',10,2);
+        $table->decimal('final_price',10,2)->index();
 
         $table->enum(
             'status',
             array_column(SubscriptionStatus::cases(), 'value')
-        )->default(SubscriptionStatus::ACTIVE->value);
+        )->default(SubscriptionStatus::ACTIVE->value)->index();
 
+        $table->index(['member_id', 'status']);
+        $table->index(['start_date', 'end_date']);
+        
         $table->timestamps();
         });
     }

@@ -21,16 +21,16 @@
                             {{-- العضو --}}
                             <div>
                                 <label class="form-label font-weight-bold">العضو <span class="text-danger">*</span></label>
-                                <select name="member_id" id="member_id"
-                                        class="form-control @error('member_id') is-invalid @enderror">
-                                    <option value="">اختر العضو...</option>
-                                    @foreach ($members as $member)
-                                        <option value="{{ $member->id }}"
-                                            {{ old('member_id') == $member->id ? 'selected' : '' }}>
-                                            {{ $member->full_name }} — {{ $member->phone }}
-                                        </option>
-                                    @endforeach
-                                </select>
+                                    <select name="member_id" class="form-control">
+                                        @foreach($members as $item)
+                                            <option
+                                                value="{{ $item->id }}"
+                                                @selected(old('member_id', $member?->id) == $item->id)
+                                            >
+                                                {{ $item->full_name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
                                 @error('member_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
 

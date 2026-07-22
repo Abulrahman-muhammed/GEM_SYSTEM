@@ -10,6 +10,8 @@ use App\Models\Subscription;
 use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
+use App\Models\SubscriptionFreeze;
+use Illuminate\Support\Facades\Auth;
 
 class SubscriptionService
 {
@@ -154,22 +156,62 @@ class SubscriptionService
     /**
      * تجميد الاشتراك.
      */
-    public function freezeSubscription(Subscription $subscription): Subscription
+
+    public function freezeSubscription(Subscription $subscription, array $data = []): Subscription
     {
-        $subscription->update(['status' => SubscriptionStatus::FROZEN->value]);
+        if ($subscription->status === SubscriptionStatus::FROZEN) {
+            return $subscription;
+        }
+
+        DB::transaction(function () use ($subscription, $data) {
+
+            SubscriptionFreeze::create([
+                'subscription_id' => $subscription->id,
+                'start_date'      => now(),
+                'reason'          => $data['reason'] ?? null,
+                'user_id'         => Auth::id(),
+            ]);
+
+            $subscription->update([
+                'status' => SubscriptionStatus::FROZEN->value,
+            ]);
+        });
 
         return $subscription->fresh();
     }
 
-    /**
-     * إلغاء تجميد الاشتراك وإرجاعه نشط.
-     */
-    public function unfreezeSubscription(Subscription $subscription): Subscription
-    {
-        $subscription->update(['status' => SubscriptionStatus::ACTIVE->value]);
+/**
+ * إلغاء تجميد الاشتراك وإرجاعه نشط، مع تمديد تاريخ الانتهاء بعدد أيام التجميد.
+ */
+public function unfreezeSubscription(Subscription $subscription): Subscription
+{
+    return DB::transaction(function () use ($subscription) {
+
+        $freeze = $subscription->freezes()
+            ->whereNull('end_date')
+            ->latest()
+            ->first();
+
+        if (! $freeze) {
+            $subscription->update(['status' => SubscriptionStatus::ACTIVE->value]);
+            return $subscription->fresh();
+        }
+
+        $days = Carbon::parse($freeze->start_date)->diffInDays(now());
+
+        $freeze->update([
+            'end_date' => now(),
+            'days'     => $days,
+        ]);
+
+        $subscription->update([
+            'status'   => SubscriptionStatus::ACTIVE->value,
+            'end_date' => $subscription->end_date->copy()->addDays($days),
+        ]);
 
         return $subscription->fresh();
-    }
+    });
+}
 
     /**
      * إلغاء الاشتراك نهائيًا.

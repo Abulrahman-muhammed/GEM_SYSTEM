@@ -14,17 +14,19 @@ return new class extends Migration
     {
         Schema::create('members', function (Blueprint $table) {
             $table->id();
-            $table->string('full_name');
+            $table->string('full_name')->index();
             $table->string('phone')->unique();
             $table->enum(
                 'gender',
                 array_column(Gender::cases(), 'value')
-            );
+            )->index();
             $table->date('birth_date')->nullable();
             $table->string('address')->nullable();
             $table->string('photo')->nullable();
-            $table->boolean('status')->default(true);
+            $table->boolean('status')->default(true)->index();
             $table->text('notes')->nullable();
+
+
             $table->timestamps();
         });
     }

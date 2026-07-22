@@ -18,12 +18,13 @@ return new class extends Migration
             ->constrained()
             ->cascadeOnDelete();
 
-        $table->date('date');
+        $table->date('date')->index();
 
-        $table->time('check_in');
+        $table->time('check_in')->index();
 
-        $table->time('check_out')->nullable();
-
+        $table->time('check_out')->nullable()->index();
+        
+        $table->index(['member_id', 'date']);
         $table->timestamps();
         });
     }

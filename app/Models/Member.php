@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use App\Enums\Gender;
+use App\Enums\SubscriptionStatus;
+
 class Member extends Model
 {
     /** @use HasFactory<\Database\Factories\MemberFactory> */
@@ -56,5 +58,10 @@ protected function photoUrl(): Attribute
         return Attribute::make(
             get: fn () => $this->birth_date?->age,
         );
+    }
+    public function activeSubscription()
+    {
+        return $this->hasOne(Subscription::class)
+            ->where('status', SubscriptionStatus::ACTIVE);
     }
 }

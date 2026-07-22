@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\AttendanceController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\InvoiceController;
+
 Route::middleware('auth')->group(function () {
 
     Route::get('/', [DashboardController::class, 'index'])

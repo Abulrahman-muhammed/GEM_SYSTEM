@@ -24,12 +24,15 @@ return new class extends Migration
         $table->enum(
             'method',
             array_column(PaymentMethod::cases(), 'value')
-        );
+        )->index();
 
         $table->date('payment_date');
 
         $table->text('notes')->nullable();
+        
+        $table->index(['subscription_id', 'amount']);
 
+        $table->index(['payment_date','method']);
         $table->timestamps();
         });
     }

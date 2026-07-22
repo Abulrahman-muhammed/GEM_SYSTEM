@@ -7,9 +7,8 @@
       <div class="row">
         <div class="col-md-12 my-4">
 
-          @if (session('success'))
-            <div class="alert alert-success">{{ session('success') }}</div>
-          @endif
+        <x-alert />
+
 
           <div class="card shadow-sm border-0">
             <!-- Card header -->
@@ -35,24 +34,10 @@
                   إجمالي الأعضاء: <strong>{{ $members->total() }}</strong>
                 </div>
 
-                <form class="d-flex align-items-center" method="GET" action="{{ route('members.index') }}">
-                  <div class="input-group input-group-toolbar">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text bg-white border-right-0">
-                        <i class="fe fe-search"></i>
-                      </span>
-                    </div>
-                    <input type="text" name="search" class="form-control border-left-0" id="search"
-                           value="{{ request('search') }}" placeholder="ابحث بالاسم أو الهاتف">
-                    <select name="per_page" id="perPage" class="custom-select select-toolbar"
-                            onchange="this.form.submit()">
-                      <option value="12" {{ request('per_page') == 12 ? 'selected' : '' }}>12</option>
-                      <option value="32" {{ request('per_page', 32) == 32 ? 'selected' : '' }}>32</option>
-                      <option value="64" {{ request('per_page') == 64 ? 'selected' : '' }}>64</option>
-                      <option value="128" {{ request('per_page') == 128 ? 'selected' : '' }}>128</option>
-                    </select>
-                  </div>
-                </form>
+                <x-search-toolbar
+                    :action="route('members.index')"
+                    placeholder="ابحث بالاسم أو الهاتف" />
+                
               </div>
 
               <!-- Table -->
@@ -67,7 +52,7 @@
                       <th>العمر</th>
                       <th class="w-25">العنوان</th>
                       <th>الحالة</th>
-                      <th class="text-center">الإجراءات</th>
+                      <th class="text-center ">الإجراءات</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -113,6 +98,12 @@
                         <td>
 
                           <div class="btn-group justify-content-center d-flex">
+                            @if (!$member->activeSubscription()->exists() && $member->status)
+                              <a href="{{ route('subscriptions.create', ['member' => $member->id]) }}"
+                                class="btn btn-sm btn-icon btn-outline-primary" title="إنشاء اشتراك" data-toggle="tooltip">
+                                  <i class="fe fe-plus-circle  me-2"></i>
+                              </a>
+                            @endif
                             <a href="{{ route('members.edit', $member) }}"
                                class="btn btn-sm btn-icon btn-outline-primary" title="تعديل" data-toggle="tooltip">
                               <i class="fe fe-edit"></i>
@@ -162,129 +153,7 @@
 @endsection
 
 @push('styles')
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-<style>
-  .members-table td,
-  .members-table th {
-    vertical-align: middle;
-    padding: .9rem .75rem;
-  }
-
-  .members-table thead th {
-    background: #f8f9fc;
-    color: #6b7280;
-    font-weight: 600;
-    font-size: .78rem;
-    text-transform: uppercase;
-    letter-spacing: .04em;
-    border-top: none;
-    border-bottom: 1px solid #edf0f5;
-  }
-
-  .members-table tbody tr {
-    background: #fff;
-    border-bottom: 1px solid #f1f3f8;
-    transition: background-color .15s ease, transform .15s ease;
-  }
-
-  .members-table tbody tr:last-child {
-    border-bottom: none;
-  }
-
-  .members-table tbody tr:hover {
-    background: #f6f9ff;
-  }
-
-  .avatar-img {
-    width: 46px;
-    height: 46px;
-    object-fit: cover;
-    border: 2px solid #fff;
-    box-shadow: 0 0 0 1px #eef0f4;
-  }
-
-  .phone-link {
-    color: #4b5563;
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    font-size: .9rem;
-  }
-
-  .phone-link:hover {
-    color: #0d6efd;
-  }
-
-  .badge-status {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    padding: .4rem .75rem;
-    font-weight: 500;
-    font-size: .78rem;
-  }
-
-  .badge-status-active {
-    background-color: rgba(25, 135, 84, .12);
-    color: #198754;
-  }
-
-  .badge-status-inactive {
-    background-color: rgba(108, 117, 125, .12);
-    color: #6c757d;
-  }
-
-  .btn-icon {
-    width: 34px;
-    height: 34px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-    border-radius: .5rem;
-    margin: 0 2px;
-  }
-
-  .input-group-toolbar {
-    width: auto;
-  }
-
-  .input-group-toolbar .form-control {
-    max-width: 220px;
-  }
-
-  .select-toolbar {
-    max-width: 90px;
-    border-left: 1px solid #ced4da;
-    border-top-left-radius: .25rem;
-    border-bottom-left-radius: .25rem;
-  }
-
-  .btn-primary {
-    padding: .55rem 1rem;
-    border-radius: .5rem;
-  }
-
-  .icon-circle {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 20px;
-  }
-
-  .bg-primary-soft {
-    background-color: rgba(13, 110, 253, .1);
-  }
-
-  .card {
-    border-radius: .9rem;
-    overflow: hidden;
-  }
-</style>
+<link rel="stylesheet" href="{{ asset('css/custom/member-index.css') }}">
 @endpush
 
 @push('scripts')
@@ -314,18 +183,6 @@
         });
       });
     });
-
-    @if (session('success'))
-      Swal.fire({
-        title: 'تم بنجاح',
-        text: @json(session('success')),
-        icon: 'success',
-        confirmButtonText: 'حسناً',
-        confirmButtonColor: '#0d6efd',
-        timer: 3000,
-        timerProgressBar: true
-      });
-    @endif
   });
 </script>
 @endpush

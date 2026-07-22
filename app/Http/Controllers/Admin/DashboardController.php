@@ -14,6 +14,6 @@ class DashboardController extends Controller
 
     public function index(): View
     {
-        return view('Admin.home', $this->dashboardService->getData());
+        return view('admin.home', $this->dashboardService->getData());
     }
 }
