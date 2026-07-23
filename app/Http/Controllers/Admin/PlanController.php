@@ -8,7 +8,6 @@ use App\Models\Plan;
 use App\Http\Requests\StorePlanRequest;
 use App\Http\Requests\UpdatePlanRequest;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Response;
 use Illuminate\Contracts\View\View;
 use App\Services\SearchService;
 class PlanController extends Controller
@@ -18,7 +17,7 @@ class PlanController extends Controller
     }
  
     /**
-     * عرض قائمة الخطط.
+     *  list plans
      */
     public function index(Request $request): View
     {
@@ -33,7 +32,7 @@ class PlanController extends Controller
     }
  
     /**
-     * عرض فورم إضافة خطة جديدة.
+     * show create plan form.
      */
     public function create(): View
     {
@@ -41,7 +40,7 @@ class PlanController extends Controller
     }
  
     /**
-     * حفظ خطة جديدة.
+     * store new plan.
      */
     public function store(StorePlanRequest $request): RedirectResponse
     {
@@ -52,7 +51,7 @@ class PlanController extends Controller
     }
  
     /**
-     * عرض فورم تعديل خطة.
+     * show edit plan form
      */
     public function edit(Plan $plan): View
     {
@@ -60,7 +59,7 @@ class PlanController extends Controller
     }
  
     /**
-     * تحديث بيانات خطة.
+     * update plan
      */
     public function update(UpdatePlanRequest $request, Plan $plan): RedirectResponse
     {
@@ -71,7 +70,7 @@ class PlanController extends Controller
     }
  
     /**
-     * حذف خطة.
+     * delete plan
      */
     public function destroy(Plan $plan): RedirectResponse
     {

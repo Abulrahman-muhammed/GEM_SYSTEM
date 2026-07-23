@@ -10,26 +10,7 @@ use Illuminate\Support\Facades\DB;
 class PaymentService
 {
     /**
-     * جلب قائمة المدفوعات مع البحث والـ pagination.
-     * البحث بيشتغل على اسم العضو أو رقم هاتفه.
-     */
-    public function list(?string $search = null, int $perPage = 32): LengthAwarePaginator
-    {
-        return Payment::query()
-            ->with(['subscription.member', 'subscription.plan'])
-            ->when($search, function ($query, $search) {
-                $query->whereHas('subscription.member', function ($q) use ($search) {
-                    $q->where('full_name', 'like', "%{$search}%")
-                        ->orWhere('phone', 'like', "%{$search}%");
-                });
-            })
-            ->latest('payment_date')
-            ->paginate($perPage)
-            ->withQueryString();
-    }
-
-    /**
-     * تسجيل دفعة جديدة على اشتراك (يستخدم من صفحة المدفوعات مباشرة).
+     * Add new payment to subscription (used from subscription page directly).
      */
     public function create(Subscription $subscription, array $data): Payment
     {
@@ -41,13 +22,5 @@ class PaymentService
                 'notes'        => $data['notes'] ?? null,
             ]);
         });
-    }
-
-    /**
-     * حذف دفعة.
-     */
-    public function delete(Payment $payment): bool
-    {
-        return (bool) $payment->delete();
     }
 }

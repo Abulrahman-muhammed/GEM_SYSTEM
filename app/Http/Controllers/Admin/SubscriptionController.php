@@ -9,46 +9,57 @@ use App\Models\Offer;
 use App\Models\Plan;
 use App\Models\Subscription;
 use App\Services\SubscriptionService;
+use App\Services\SearchService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 use Illuminate\Http\Request;
+use App\Enums\SubscriptionStatus;
+
 class SubscriptionController extends Controller
 {
-    public function __construct(protected SubscriptionService $subscriptionService)
-    {
+    public function __construct(
+        protected SubscriptionService $subscriptionService,
+        protected SearchService $searchService
+    ) {
     }
 
     /**
-     * عرض قائمة الاشتراكات.
+     * List subscriptions
      */
-    public function index(): View
+    public function index(Request $request)
     {
-        $subscriptions = $this->subscriptionService->list(
-            search: request('search'),
-            perPage: (int) request('per_page', 32),
+        $query = Subscription::query()
+            ->with(['member','plan','offer']);
+        $search = $request->get('search');
+        $this->searchService->apply(
+            $query,
+            $search,
+            [
+                'member.full_name',
+                'member.phone',
+            ]
         );
-
+        $subscriptions = $query
+            ->latest()
+            ->paginate($request->integer('per_page', 10))
+            ->withQueryString();
         return view('admin.subscriptions.index', compact('subscriptions'));
     }
 
     /**
-     * عرض فورم إضافة اشتراك جديد.
+     * show create subscription form
      */
     public function create(Request $request): View
-    {        
-        $member = null;
-        if ($request->filled('member')) {
-            $member = Member::findOrFail($request->member);
-        }
-        $members = Member::orderBy('full_name')->get(['id', 'full_name', 'phone']);
-        $plans   = Plan::active()->orderBy('name')->get(['id', 'name', 'price', 'duration_days']);
-        $offers  = Offer::active()->orderBy('name')->get(['id', 'name', 'discount_type', 'discount_value']);
-
-        return view('admin.subscriptions.create', compact('members', 'plans', 'offers','member'));
+    {
+        return view(
+            'admin.subscriptions.create',
+            $this->subscriptionService->createData(
+                $request->integer('member')
+            )
+        );
     }
-
     /**
-     * حفظ اشتراك جديد.
+     * store new subscription
      */
     public function store(StoreSubscriptionRequest $request): RedirectResponse
     {
@@ -60,7 +71,7 @@ class SubscriptionController extends Controller
     }
 
     /**
-     * عرض تفاصيل اشتراك (تستخدم برضو لطباعة الإيصال).
+     * show subscription details (used also for printing )
      */
     public function show(Subscription $subscription): View
     {
@@ -70,21 +81,19 @@ class SubscriptionController extends Controller
     }
 
     /**
-     * حذف اشتراك.
+     * delete subscription.
      */
     public function destroy(Subscription $subscription): RedirectResponse
     {
-        $this->subscriptionService->delete($subscription);
+        $subscription->delete();
 
         return redirect()
             ->route('subscriptions.index')
             ->with('success', 'تم حذف الاشتراك بنجاح.');
     }
 
-    /* ══════════════════════════ Actions إضافية ══════════════════════════ */
-
     /**
-     * تجديد الاشتراك.
+     * renew subscription.
      */
     public function renew(Subscription $subscription): RedirectResponse
     {
@@ -96,7 +105,7 @@ class SubscriptionController extends Controller
     }
 
     /**
-     * تجميد الاشتراك.
+     * freeze subscription
      */
     public function freeze(Request $request, Subscription $subscription)
     {
@@ -113,7 +122,7 @@ class SubscriptionController extends Controller
     }
 
     /**
-     * إلغاء تجميد الاشتراك.
+     * unfreeze subscription.
      */
     public function unfreeze(Subscription $subscription): RedirectResponse
     {
@@ -125,11 +134,11 @@ class SubscriptionController extends Controller
     }
 
     /**
-     * إلغاء الاشتراك نهائيًا.
+     * cancel subscription.
      */
     public function cancel(Subscription $subscription): RedirectResponse
     {
-        $this->subscriptionService->cancelSubscription($subscription);
+        $subscription->update(['status' => SubscriptionStatus::CANCELLED->value]);
 
         return redirect()
             ->route('subscriptions.index')

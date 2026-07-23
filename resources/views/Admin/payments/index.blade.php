@@ -6,11 +6,6 @@
     <div class="col-12">
       <div class="row">
         <div class="col-md-12 my-4">
-
-          @if (session('success'))
-            <div class="alert alert-success">{{ session('success') }}</div>
-          @endif
-
           <div class="card shadow-sm border-0">
             <!-- Card header -->
             <div class="card-header bg-white d-flex justify-content-between align-items-center flex-wrap py-3">
@@ -35,24 +30,7 @@
                   إجمالي المدفوعات: <strong>{{ $payments->total() }}</strong>
                 </div>
 
-                <form class="d-flex align-items-center" method="GET" action="{{ route('payments.index') }}">
-                  <div class="input-group input-group-toolbar">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text bg-white border-right-0">
-                        <i class="fe fe-search"></i>
-                      </span>
-                    </div>
-                    <input type="text" name="search" class="form-control border-left-0" id="search"
-                           value="{{ request('search') }}" placeholder="ابحث باسم العضو أو رقم الهاتف">
-                    <select name="per_page" id="perPage" class="custom-select select-toolbar"
-                            onchange="this.form.submit()">
-                      <option value="12" {{ request('per_page') == 12 ? 'selected' : '' }}>12</option>
-                      <option value="32" {{ request('per_page', 32) == 32 ? 'selected' : '' }}>32</option>
-                      <option value="64" {{ request('per_page') == 64 ? 'selected' : '' }}>64</option>
-                      <option value="128" {{ request('per_page') == 128 ? 'selected' : '' }}>128</option>
-                    </select>
-                  </div>
-                </form>
+                <x-search-toolbar :action="route('payments.index')" placeholder="ابحث باسم العضو أو رقم الهاتف" />
               </div>
 
               <!-- Table -->

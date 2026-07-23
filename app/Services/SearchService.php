@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Services;
 
 use Illuminate\Database\Eloquent\Builder;
@@ -10,20 +11,24 @@ class SearchService
         ?string $search,
         array $columns
     ): Builder {
-        if (!$search) {
+        if (blank($search)) {
             return $query;
         }
 
-        $query->where(function ($q) use ($search, $columns) {
+        return $query->where(function ($q) use ($columns, $search) {
 
             foreach ($columns as $column) {
 
                 if (str_contains($column, '.')) {
 
-                    [$relation, $field] = explode('.', $column);
+                    $segments = explode('.', $column);
 
-                    $q->orWhereHas($relation, function ($r) use ($field, $search) {
-                        $r->where($field, 'like', "%{$search}%");
+                    $field = array_pop($segments);
+
+                    $relation = implode('.', $segments);
+
+                    $q->orWhereHas($relation, function ($relationQuery) use ($field, $search) {
+                        $relationQuery->where($field, 'like', "%{$search}%");
                     });
 
                 } else {
@@ -31,11 +36,8 @@ class SearchService
                     $q->orWhere($column, 'like', "%{$search}%");
 
                 }
-
             }
 
         });
-
-        return $query;
     }
 }

@@ -68,6 +68,28 @@ class SubscriptionService
 
         return $start->copy()->addDays($plan->duration_days);
     }
+    /**
+     * Create data for create and edit subscription forms
+     */
+    public function createData(?int $memberId = null): array
+    {
+        return [
+            'member' => $memberId
+                ? Member::findOrFail($memberId)
+                : null,
+
+            'members' => Member::orderBy('full_name')
+                ->get(['id', 'full_name', 'phone']),
+
+            'plans' => Plan::active()
+                ->orderBy('name')
+                ->get(['id', 'name', 'price', 'duration_days']),
+
+            'offers' => Offer::active()
+                ->orderBy('name')
+                ->get(['id', 'name', 'discount_type', 'discount_value']),
+        ];
+    }
 
     /**
      * إنشاء اشتراك جديد + أول عملية دفع (لو موجودة).
@@ -213,21 +235,4 @@ public function unfreezeSubscription(Subscription $subscription): Subscription
     });
 }
 
-    /**
-     * إلغاء الاشتراك نهائيًا.
-     */
-    public function cancelSubscription(Subscription $subscription): Subscription
-    {
-        $subscription->update(['status' => SubscriptionStatus::CANCELLED->value]);
-
-        return $subscription->fresh();
-    }
-
-    /**
-     * حذف اشتراك.
-     */
-    public function delete(Subscription $subscription): bool
-    {
-        return (bool) $subscription->delete();
-    }
 }
